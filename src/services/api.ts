@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Configuração básica do Axios
 const api = axios.create({
-  baseURL: 'http://localhost:3333/api/', // Apontando para o backend local novamente
+  baseURL: 'https://cardapio-sytem-api.onrender.com/api/', // Apontando para o backend na nuvem
   timeout: 10000,
 });
 
