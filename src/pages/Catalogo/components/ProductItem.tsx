@@ -36,7 +36,7 @@ export function ProductItem({ product }: ProductItemProps) {
         <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>
           {product.description || 'Sem descrição'}
         </Typography>
-        <Typography variant="subtitle1" fontWeight="bold" color="primary">
+        <Typography variant="subtitle1" sx={{ fontWeight: 'bold', color: "primary"}}>
           {formattedPrice}
         </Typography>
       </CardContent>

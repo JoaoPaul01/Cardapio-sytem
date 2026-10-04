@@ -7,7 +7,7 @@ export default function Dashboard() {
 
   return (
     <Box>
-      <Typography variant="h4" gutterBottom fontWeight="bold">
+      <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold' }}>
         Painel de Controle
       </Typography>
       

@@ -24,7 +24,7 @@ export function CategoryList({ categories, onAddProduct }: CategoryListProps) {
       {categories.map((category) => (
         <Paper key={category.id} elevation={1} sx={{ mb: 4, p: 3, borderRadius: 2 }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-            <Typography variant="h5" fontWeight="bold">
+            <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
               {category.name}
             </Typography>
             <Button 

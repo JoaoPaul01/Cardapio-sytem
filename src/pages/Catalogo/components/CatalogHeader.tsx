@@ -12,7 +12,7 @@ interface CatalogHeaderProps {
 export function CatalogHeader({ filterText, onFilterChange, onNewCategory }: CatalogHeaderProps) {
   return (
     <Box sx={{ mb: 4 }}>
-      <Typography variant="h4" fontWeight="bold" gutterBottom>
+      <Typography variant="h4" sx={{ fontWeight: 'bold' }} gutterBottom>
         Catálogo
       </Typography>
 

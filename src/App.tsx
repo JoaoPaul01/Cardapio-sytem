@@ -8,7 +8,7 @@ import { Layout } from './components/Layout/Layout';
 import './App.css';
 
 // Componente para proteger as rotas privadas
-const PrivateRoute = ({ children }: { children: JSX.Element }) => {
+const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated } = useAppContext();
 
   if (!isAuthenticated) {

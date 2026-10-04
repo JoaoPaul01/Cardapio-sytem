@@ -44,7 +44,7 @@ export function Sidebar({ mobileOpen, handleDrawerToggle }: SidebarProps) {
   const drawerContent = (
     <>
       <Toolbar sx={{ justifyContent: 'center', py: 2 }}>
-        <Typography variant="h6" fontWeight="bold" color="#fff">
+        <Typography variant="h6" sx={{ fontWeight: 'bold', color: "#fff"}}>
           Churrascaria
         </Typography>
       </Toolbar>

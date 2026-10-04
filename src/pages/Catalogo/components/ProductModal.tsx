@@ -147,7 +147,7 @@ export function ProductModal({ open, categoryId, onClose, onSuccess }: ProductMo
             value={price}
             onChange={(e) => setPrice(e.target.value)}
             disabled={loading}
-            inputProps={{ step: "0.01", min: "0" }}
+            slotProps={{ htmlInput: { step: "0.01", min: "0" } }}
           />
 
         </Box>
