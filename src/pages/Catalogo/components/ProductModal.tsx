@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { 
   Dialog, 
   DialogTitle, 
@@ -19,10 +19,11 @@ interface ProductModalProps {
   categoryId: string;
   onClose: () => void;
   onSuccess: () => void;
+  initialData?: any;
 }
 
-export function ProductModal({ open, categoryId, onClose, onSuccess }: ProductModalProps) {
-  const { postData, uploadImageData } = useAppContext();
+export function ProductModal({ open, categoryId, onClose, onSuccess, initialData }: ProductModalProps) {
+  const { postData, patchData, uploadImageData } = useAppContext();
   
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
@@ -33,6 +34,22 @@ export function ProductModal({ open, categoryId, onClose, onSuccess }: ProductMo
   const [loading, setLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  useEffect(() => {
+    if (initialData) {
+      setName(initialData.name || '');
+      setDescription(initialData.description || '');
+      setPrice(initialData.price?.toString() || '');
+      // If we had image URLs from the API, we could set preview here
+      setPreview(null); 
+    } else {
+      setName('');
+      setDescription('');
+      setPrice('');
+      setFile(null);
+      setPreview(null);
+    }
+  }, [initialData, open]);
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const selectedFile = e.target.files[0];
@@ -41,29 +58,29 @@ export function ProductModal({ open, categoryId, onClose, onSuccess }: ProductMo
     }
   };
 
-  const handleCreate = async () => {
+  const handleSave = async () => {
     if (!name.trim() || !price) return;
     
     setLoading(true);
     try {
-      // Cria o produto básico
-      // Se houvesse o endpoint de foto configurado totalmente, 
-      // faríamos o upload da foto em seguida, anexando ao ID retornado do produto.
-      // const newProduct = await postData(locations.products, {...})
-      // await uploadImageData(`products/${newProduct.id}/image`, file)
-
-      await postData(locations.products, { 
+      const payload = {
         categoryId,
         name,
         description,
         price: parseFloat(price)
-      });
+      };
+
+      if (initialData) {
+        await patchData(`${locations.products}/${initialData.id}`, payload);
+      } else {
+        await postData(locations.products, payload);
+      }
       
       handleCancel();
       onSuccess();
     } catch (error) {
-      console.error('Erro ao criar produto', error);
-      alert('Não foi possível criar o produto.');
+      console.error('Erro ao salvar produto', error);
+      alert('Não foi possível salvar o produto.');
     } finally {
       setLoading(false);
     }
@@ -80,7 +97,7 @@ export function ProductModal({ open, categoryId, onClose, onSuccess }: ProductMo
 
   return (
     <Dialog open={open} onClose={handleCancel} fullWidth maxWidth="sm">
-      <DialogTitle>Novo Produto</DialogTitle>
+      <DialogTitle>{initialData ? 'Editar Produto' : 'Novo Produto'}</DialogTitle>
       <DialogContent>
         <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', gap: 3 }}>
           
@@ -157,7 +174,7 @@ export function ProductModal({ open, categoryId, onClose, onSuccess }: ProductMo
           Cancelar
         </Button>
         <Button 
-          onClick={handleCreate} 
+          onClick={handleSave} 
           variant="contained" 
           disabled={loading || !name.trim() || !price}
           startIcon={loading ? <CircularProgress size={20} /> : null}

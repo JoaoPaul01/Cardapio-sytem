@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Configuração básica do Axios
 const api = axios.create({
-  baseURL: 'http://localhost:3333/api/', // Apontando para o backend Cardapio
+  baseURL: 'http://localhost:3333/api/', // Apontando para o backend local novamente
   timeout: 10000,
 });
 

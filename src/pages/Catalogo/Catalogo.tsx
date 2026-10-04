@@ -8,14 +8,18 @@ import { CategoryModal } from './components/CategoryModal';
 import { ProductModal } from './components/ProductModal';
 
 export default function Catalogo() {
-  const { getData } = useAppContext();
+  const { getData, removeData, patchData } = useAppContext();
   const [categories, setCategories] = useState<any[]>([]);
   const [filterText, setFilterText] = useState('');
   
   // Modals state
   const [isCategoryModalOpen, setCategoryModalOpen] = useState(false);
   const [isProductModalOpen, setProductModalOpen] = useState(false);
+  
+  // Edit / Add state
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
+  const [categoryToEdit, setCategoryToEdit] = useState<any>(null);
+  const [productToEdit, setProductToEdit] = useState<any>(null);
 
   const fetchCatalog = async () => {
     try {
@@ -30,9 +34,57 @@ export default function Catalogo() {
     fetchCatalog();
   }, []);
 
-  const handleOpenProductModal = (categoryId: string) => {
+  const handleOpenCategoryModal = (category?: any) => {
+    setCategoryToEdit(category || null);
+    setCategoryModalOpen(true);
+  };
+
+  const handleOpenProductModal = (categoryId: string, product?: any) => {
     setSelectedCategoryId(categoryId);
+    setProductToEdit(product || null);
     setProductModalOpen(true);
+  };
+
+  const handleDeleteCategory = async (categoryId: string) => {
+    if (!window.confirm('Tem certeza que deseja excluir esta categoria?')) return;
+    try {
+      await removeData(`${locations.categories}/${categoryId}`);
+      fetchCatalog();
+    } catch (error) {
+      console.error('Erro ao excluir categoria', error);
+      alert('Não foi possível excluir a categoria.');
+    }
+  };
+
+  const handleDeleteProduct = async (productId: string) => {
+    if (!window.confirm('Tem certeza que deseja excluir este produto?')) return;
+    try {
+      await removeData(`${locations.products}/${productId}`);
+      fetchCatalog();
+    } catch (error) {
+      console.error('Erro ao excluir produto', error);
+      alert('Não foi possível excluir o produto.');
+    }
+  };
+
+  const handleUpdateCategory = async (categoryId: string, payload: any) => {
+    try {
+      await patchData(`${locations.categories}/${categoryId}`, payload);
+      fetchCatalog();
+    } catch (error) {
+      console.error('Erro ao atualizar categoria', error);
+      alert('Não foi possível atualizar a categoria.');
+    }
+  };
+
+  const handleUpdateProduct = async (productId: string, payload: any) => {
+    try {
+      await patchData(`${locations.products}/${productId}`, payload);
+      fetchCatalog();
+    } catch (error) {
+      console.error('Erro ao atualizar produto', error);
+      alert('Não foi possível atualizar o produto.');
+    }
   };
 
   // Lógica do filtro para nome do produto ou nome da categoria
@@ -53,18 +105,25 @@ export default function Catalogo() {
       <CatalogHeader 
         filterText={filterText} 
         onFilterChange={setFilterText} 
-        onNewCategory={() => setCategoryModalOpen(true)} 
+        onNewCategory={() => handleOpenCategoryModal()} 
       />
       
       <CategoryList 
         categories={filteredCategories} 
-        onAddProduct={handleOpenProductModal} 
+        onAddProduct={(categoryId) => handleOpenProductModal(categoryId)} 
+        onEditCategory={handleOpenCategoryModal}
+        onDeleteCategory={handleDeleteCategory}
+        onUpdateCategory={handleUpdateCategory}
+        onEditProduct={(product) => handleOpenProductModal(product.categoryId, product)}
+        onDeleteProduct={handleDeleteProduct}
+        onUpdateProduct={handleUpdateProduct}
       />
 
       <CategoryModal 
         open={isCategoryModalOpen} 
         onClose={() => setCategoryModalOpen(false)} 
         onSuccess={fetchCatalog}
+        initialData={categoryToEdit}
       />
 
       {selectedCategoryId && (
@@ -73,6 +132,7 @@ export default function Catalogo() {
           categoryId={selectedCategoryId} 
           onClose={() => setProductModalOpen(false)} 
           onSuccess={fetchCatalog}
+          initialData={productToEdit}
         />
       )}
     </Box>

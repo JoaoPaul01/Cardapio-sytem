@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Dialog, 
   DialogTitle, 
@@ -15,25 +15,38 @@ interface CategoryModalProps {
   open: boolean;
   onClose: () => void;
   onSuccess: () => void;
+  initialData?: any;
 }
 
-export function CategoryModal({ open, onClose, onSuccess }: CategoryModalProps) {
-  const { postData } = useAppContext();
+export function CategoryModal({ open, onClose, onSuccess, initialData }: CategoryModalProps) {
+  const { postData, patchData } = useAppContext();
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleCreate = async () => {
+  useEffect(() => {
+    if (initialData) {
+      setName(initialData.name || '');
+    } else {
+      setName('');
+    }
+  }, [initialData, open]);
+
+  const handleSave = async () => {
     if (!name.trim()) return;
     
     setLoading(true);
     try {
-      await postData(locations.categories, { name });
+      if (initialData) {
+        await patchData(`${locations.categories}/${initialData.id}`, { name });
+      } else {
+        await postData(locations.categories, { name });
+      }
       setName('');
       onSuccess();
       onClose();
     } catch (error) {
-      console.error('Erro ao criar categoria', error);
-      alert('Não foi possível criar a categoria.');
+      console.error('Erro ao salvar categoria', error);
+      alert('Não foi possível salvar a categoria.');
     } finally {
       setLoading(false);
     }
@@ -46,7 +59,7 @@ export function CategoryModal({ open, onClose, onSuccess }: CategoryModalProps) 
 
   return (
     <Dialog open={open} onClose={handleCancel} fullWidth maxWidth="sm">
-      <DialogTitle>Nova Categoria</DialogTitle>
+      <DialogTitle>{initialData ? 'Editar Categoria' : 'Nova Categoria'}</DialogTitle>
       <DialogContent>
         <TextField
           autoFocus
@@ -65,7 +78,7 @@ export function CategoryModal({ open, onClose, onSuccess }: CategoryModalProps) 
           Cancelar
         </Button>
         <Button 
-          onClick={handleCreate} 
+          onClick={handleSave} 
           variant="contained" 
           disabled={loading || !name.trim()}
           startIcon={loading ? <CircularProgress size={20} /> : null}
