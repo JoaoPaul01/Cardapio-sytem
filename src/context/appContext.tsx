@@ -1,4 +1,4 @@
-import React, { createContext, useContext, ReactNode, useState, useEffect } from 'react';
+import React, { createContext, useContext, ReactNode, useState, useEffect, useCallback } from 'react';
 import api from '../services/api';
 
 interface AppContextProps {
@@ -57,28 +57,28 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   // GET
-  const getData = async (endpoint: string, params?: any) => {
+  const getData = useCallback(async (endpoint: string, params?: any) => {
     const response = await api.get(endpoint, { params });
     return response.data;
-  };
+  }, []);
 
   // POST
-  const postData = async (endpoint: string, data: any) => {
+  const postData = useCallback(async (endpoint: string, data: any) => {
     const response = await api.post(endpoint, data);
     return response.data;
-  };
+  }, []);
 
   // PATCH
-  const patchData = async (endpoint: string, data: any) => {
+  const patchData = useCallback(async (endpoint: string, data: any) => {
     const response = await api.patch(endpoint, data);
     return response.data;
-  };
+  }, []);
 
   // DELETE
-  const removeData = async (endpoint: string) => {
+  const removeData = useCallback(async (endpoint: string) => {
     const response = await api.delete(endpoint);
     return response.data;
-  };
+  }, []);
 
   // UPLOAD DE IMAGEM
   const uploadImageData = async (endpoint: string, file: File) => {

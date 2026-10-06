@@ -8,14 +8,17 @@ import { Layout } from './components/Layout/Layout';
 import './App.css';
 
 // Componente para proteger as rotas privadas
-const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
+const PrivateRoute = ({ children, noLayout }: { children: React.ReactNode, noLayout?: boolean }) => {
   const { isAuthenticated } = useAppContext();
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
 
-  // Se estiver logado, envolve a tela com o Layout padrão (Sidebar)
+  if (noLayout) {
+    return <>{children}</>;
+  }
+
   return <Layout>{children}</Layout>;
 };
 
@@ -39,7 +42,7 @@ function App() {
               path={route.path}
               element={
                 route.isPrivate ? (
-                  <PrivateRoute>
+                  <PrivateRoute noLayout={route.noLayout}>
                     <route.element />
                   </PrivateRoute>
                 ) : (

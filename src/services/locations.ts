@@ -5,4 +5,5 @@ export const locations = {
   categories: 'categories',
   orders: 'orders',
   tables: 'tables',
+  estoque: 'estoque',
 };
