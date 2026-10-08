@@ -17,7 +17,8 @@ import {
   Badge,
   CircularProgress,
   Alert,
-  Dialog
+  Dialog,
+  IconButton
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
@@ -138,6 +139,8 @@ export default function MesaView() {
     }
   };
 
+  const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
+
   const filteredCategories = categories.map(cat => {
     const products = cat.products || [];
     const filteredProducts = products.filter((p: any) =>
@@ -145,10 +148,14 @@ export default function MesaView() {
       cat.name.toLowerCase().includes(filterText.toLowerCase())
     );
     return { ...cat, products: filteredProducts };
-  }).filter(cat =>
-    cat.name.toLowerCase().includes(filterText.toLowerCase()) ||
-    (cat.products && cat.products.length > 0)
-  );
+  }).filter(cat => {
+    // text filter
+    const matchesText = cat.name.toLowerCase().includes(filterText.toLowerCase()) || (cat.products && cat.products.length > 0);
+    // category selection filter
+    const matchesCategory = selectedCategory === 'ALL' || cat.id === selectedCategory;
+    
+    return matchesText && matchesCategory;
+  });
 
   const cartTotalItems = cartItems.reduce((acc, item) => acc + item.qty, 0);
 
@@ -160,12 +167,11 @@ export default function MesaView() {
         flexShrink: 0,
         bgcolor: '#ffffff',
         borderRight: '1px solid #ddd',
-        display: 'flex',
+        display: { xs: 'none', md: 'flex' },
         flexDirection: 'column',
         overflowY: 'auto'
       }}>
         <Box sx={{ p: 3, textAlign: 'center', borderBottom: '1px solid #ddd' }}>
-          <Typography variant="h4" sx={{ fontWeight: 'bold' }}>we do</Typography>
         </Box>
         <Box sx={{ p: 2 }}>
           <Button
@@ -200,19 +206,30 @@ export default function MesaView() {
           bgcolor: '#ffffff',
           borderBottom: '1px solid #ddd',
           display: 'flex',
-          alignItems: 'center',
+          flexDirection: { xs: 'column', sm: 'row' },
+          alignItems: { xs: 'stretch', sm: 'center' },
+          gap: 2,
           justifyContent: 'space-between'
         }}>
-          <Typography variant="h6">
-            {mesa ? `Mesa ${mesa.tableNumber}` : 'Mesa'}
-          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <IconButton 
+              sx={{ display: { xs: 'flex', md: 'none' }, mr: 1 }} 
+              onClick={() => navigate('/')}
+            >
+              <ArrowBackIcon />
+            </IconButton>
+            <Typography variant="h6">
+              {mesa ? `Mesa ${mesa.tableNumber}` : 'Mesa'}
+            </Typography>
+          </Box>
 
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: { xs: 'wrap', sm: 'nowrap' } }}>
             <TextField
               size="small"
               placeholder="O que deseja pedir?"
               value={filterText}
               onChange={(e) => setFilterText(e.target.value)}
+              sx={{ flexGrow: 1, minWidth: 150 }}
               slotProps={{
                 input: {
                   startAdornment: (
@@ -231,7 +248,7 @@ export default function MesaView() {
                 </Badge>
               }
               onClick={() => setCheckoutDialogOpen(true)}
-              sx={{ borderRadius: 5 }}
+              sx={{ borderRadius: 5, whiteSpace: 'nowrap' }}
             >
               Carrinho
             </Button>
@@ -241,18 +258,37 @@ export default function MesaView() {
         {/* Scrollable Content */}
         <Box sx={{ flex: 1, overflowY: 'auto', p: 3 }}>
           {/* Banner */}
-          <Box sx={{
-            width: '100%',
-            height: 200,
-            borderRadius: 2,
-            mb: 4,
-            background: 'linear-gradient(135deg, #1e1e2d 0%, #3a3a5a 100%)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}>
-            <Typography variant="h4" sx={{ fontWeight: 'bold', color: '#fff' }}>Cardápio</Typography>
-          </Box>
+
+          {/* Category Selector */}
+          {!loading && !loadError && categories.length > 0 && (
+            <Box sx={{
+              display: 'flex',
+              overflowX: 'auto',
+              gap: 2,
+              mb: 4,
+              pb: 1,
+              '&::-webkit-scrollbar': { height: 6 },
+              '&::-webkit-scrollbar-thumb': { backgroundColor: '#ccc', borderRadius: 3 }
+            }}>
+              <Button
+                variant={selectedCategory === 'ALL' ? 'contained' : 'outlined'}
+                onClick={() => setSelectedCategory('ALL')}
+                sx={{ borderRadius: 20, whiteSpace: 'nowrap', textTransform: 'none', px: 3, flexShrink: 0 }}
+              >
+                Ver todos
+              </Button>
+              {categories.map((cat, idx) => (
+                <Button
+                  key={cat.id || idx}
+                  variant={selectedCategory === cat.id ? 'contained' : 'outlined'}
+                  onClick={() => setSelectedCategory(cat.id)}
+                  sx={{ borderRadius: 20, whiteSpace: 'nowrap', textTransform: 'none', px: 3, flexShrink: 0 }}
+                >
+                  {cat.name}
+                </Button>
+              ))}
+            </Box>
+          )}
 
           {loadError && (
             <Alert severity="error" sx={{ mb: 3 }} action={<Button color="inherit" onClick={fetchData}>Tentar novamente</Button>}>

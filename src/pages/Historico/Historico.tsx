@@ -145,7 +145,7 @@ export default function Historico() {
 
       {/* Detalhes do Pedido Dialog */}
       <Dialog open={openDialog} onClose={handleCloseDetails} maxWidth="sm" fullWidth>
-        <DialogTitle sx={{ fontWeight: 'bold' }}>Detalhes do Pedido</DialogTitle>
+        <DialogTitle sx={{ fontWeight: 'bold', color: 'black' }}>Detalhes do Pedido</DialogTitle>
         <DialogContent dividers>
           {selectedOrder && (
             <Box>

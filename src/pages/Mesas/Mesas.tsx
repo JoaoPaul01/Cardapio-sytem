@@ -198,7 +198,7 @@ export default function Mesas() {
       </Dialog>
 
       <Dialog open={!!mesaToDelete} onClose={() => setMesaToDelete(null)} fullWidth maxWidth="xs">
-        <DialogTitle>Excluir Mesa</DialogTitle>
+        <DialogTitle sx={{ fontWeight: 'bold', color: 'black' }}>Excluir Mesa</DialogTitle>
         <DialogContent>
           {deleteError && <Alert severity="error" sx={{ mb: 2 }}>{deleteError}</Alert>}
           <DialogContentText>

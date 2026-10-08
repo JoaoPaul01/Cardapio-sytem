@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, TextField, IconButton, Box } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, TextField, IconButton, Box, Stack } from '@mui/material';
 import RemoveIcon from '@mui/icons-material/Remove';
 import AddIcon from '@mui/icons-material/Add';
 
@@ -25,7 +25,7 @@ export const ProductDialog: React.FC<ProductDialogProps> = ({ open, product, onC
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle>{product.name}</DialogTitle>
+      <DialogTitle sx={{ fontWeight: 'bold', color: 'black' }}>{product.name}</DialogTitle>
       <DialogContent dividers>
         {product.description && (
           <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
@@ -57,18 +57,27 @@ export const ProductDialog: React.FC<ProductDialogProps> = ({ open, product, onC
           Subtotal: {((Number(product.price) || 0) * qty).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
         </Typography>
       </DialogContent>
-      <DialogActions>
-        <Button onClick={() => onAdd(product, qty, observations, false)} color="inherit">
+      <Stack
+        direction="row"
+        spacing={1}
+        sx={{ justifyContent: 'flex-end' }}
+      >
+        <Button
+          onClick={() => onAdd(product, qty, observations, false)}
+          color="inherit"
+          sx={{ textTransform: 'none' }}
+        >
           Continuar comprando
         </Button>
-        <Button 
-          onClick={() => onAdd(product, qty, observations, true)} 
-          variant="contained" 
+        <Button
+          onClick={() => onAdd(product, qty, observations, true)}
+          variant="contained"
           color="primary"
+          sx={{ textTransform: 'none' }}
         >
           Avançar para o carrinho
         </Button>
-      </DialogActions>
+      </Stack>
     </Dialog>
   );
 };

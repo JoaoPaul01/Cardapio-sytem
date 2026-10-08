@@ -60,7 +60,9 @@ export function Layout({ children }: LayoutProps) {
         sx={{ 
           flexGrow: 1, 
           p: { xs: 2, sm: 4 }, 
-          width: { sm: `calc(100% - ${drawerWidth}px)` },
+          width: { xs: '100%', sm: `calc(100% - ${drawerWidth}px)` },
+          maxWidth: '100%',
+          overflowX: 'hidden',
           mt: { xs: 8, sm: 0 } // Espaço para a AppBar no mobile
         }}
       >
