@@ -2,8 +2,7 @@ import axios from 'axios';
 
 // Configuração básica do Axios
 const api = axios.create({
-  // baseURL: 'https://cardapio-sytem-api.onrender.com/api/', // Produção
-  baseURL: 'http://localhost:3333/api/', // Localhost para testes locais
+  baseURL: import.meta.env.VITE_API_URL || (import.meta.env.PROD ? 'https://cardapio-sytem-api.onrender.com/api/' : 'http://localhost:3333/api/'),
   timeout: 10000,
 });
 
