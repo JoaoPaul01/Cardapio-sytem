@@ -6,7 +6,10 @@ import {
   DialogActions, 
   TextField, 
   Button, 
-  CircularProgress
+  CircularProgress,
+  FormControlLabel,
+  Switch,
+  Box
 } from '@mui/material';
 import { useAppContext } from '../../../context/appContext';
 import { locations } from '../../../services/locations';
@@ -21,13 +24,16 @@ interface CategoryModalProps {
 export function CategoryModal({ open, onClose, onSuccess, initialData }: CategoryModalProps) {
   const { postData, patchData } = useAppContext();
   const [name, setName] = useState('');
+  const [isActive, setIsActive] = useState(true);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (initialData) {
       setName(initialData.name || '');
+      setIsActive(initialData.isActive !== false);
     } else {
       setName('');
+      setIsActive(true);
     }
   }, [initialData, open]);
 
@@ -36,10 +42,11 @@ export function CategoryModal({ open, onClose, onSuccess, initialData }: Categor
     
     setLoading(true);
     try {
+      const payload = { name: name.trim(), isActive };
       if (initialData) {
-        await patchData(`${locations.categories}/${initialData.id}`, { name });
+        await patchData(`${locations.categories}/${initialData.id}`, payload);
       } else {
-        await postData(locations.categories, { name });
+        await postData(locations.categories, payload);
       }
       setName('');
       onSuccess();
@@ -54,6 +61,7 @@ export function CategoryModal({ open, onClose, onSuccess, initialData }: Categor
 
   const handleCancel = () => {
     setName('');
+    setIsActive(true);
     onClose();
   };
 
@@ -61,17 +69,30 @@ export function CategoryModal({ open, onClose, onSuccess, initialData }: Categor
     <Dialog open={open} onClose={handleCancel} fullWidth maxWidth="sm">
       <DialogTitle sx={{ color: 'black' }}>{initialData ? 'Editar Categoria' : 'Nova Categoria'}</DialogTitle>
       <DialogContent>
-        <TextField
-          autoFocus
-          margin="dense"
-          label="Nome da Categoria"
-          fullWidth
-          variant="outlined"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          disabled={loading}
-          sx={{ mt: 2 }}
-        />
+        <Box sx={{ mt: 1, display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="Nome da Categoria"
+            fullWidth
+            variant="outlined"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            disabled={loading}
+          />
+
+          <FormControlLabel
+            control={
+              <Switch
+                checked={isActive}
+                onChange={(e) => setIsActive(e.target.checked)}
+                color="primary"
+                disabled={loading}
+              />
+            }
+            label={isActive ? "Categoria Ativa (visível no cardápio)" : "Categoria Pausada (oculta para clientes)"}
+          />
+        </Box>
       </DialogContent>
       <DialogActions sx={{ px: 3, pb: 3 }}>
         <Button onClick={handleCancel} color="inherit" disabled={loading}>

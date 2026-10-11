@@ -8,7 +8,9 @@ import {
   Button, 
   CircularProgress,
   Box,
-  Typography
+  Typography,
+  FormControlLabel,
+  Switch
 } from '@mui/material';
 import PhotoCamera from '@mui/icons-material/PhotoCamera';
 import { useAppContext } from '../../../context/appContext';
@@ -28,6 +30,7 @@ export function ProductModal({ open, categoryId, onClose, onSuccess, initialData
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
+  const [isActive, setIsActive] = useState(true);
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   
@@ -39,12 +42,14 @@ export function ProductModal({ open, categoryId, onClose, onSuccess, initialData
       setName(initialData.name || '');
       setDescription(initialData.description || '');
       setPrice(initialData.price?.toString() || '');
+      setIsActive(initialData.isActive !== false);
       // Set preview for existing image if any
       setPreview(initialData.imageUrl || null); 
     } else {
       setName('');
       setDescription('');
       setPrice('');
+      setIsActive(true);
       setFile(null);
       setPreview(null);
     }
@@ -63,26 +68,32 @@ export function ProductModal({ open, categoryId, onClose, onSuccess, initialData
     
     setLoading(true);
     try {
-      let uploadedImage = initialData?.imageUrl || '';
+      let uploadedImageUrl = initialData?.imageUrl || '';
+      let uploadedImagePath = initialData?.imagePath || undefined;
 
       // Se houver arquivo selecionado, faz o upload primeiro
       if (file) {
-        // O upload envia o arquivo para a API via POST. Ao retornar o nome, o Patch/Post finaliza salvando os dados
+        // O upload envia o arquivo para a API via POST. Ao retornar os dados do Storage, salva no backend
         const uploadResponse = await uploadImageData('upload', file);
         
-        // Pega o retorno do backend e salva na variável
-        uploadedImage = uploadResponse?.imageUrl || uploadResponse?.url || uploadResponse?.image || uploadResponse?.filename || uploadResponse?.id || uploadResponse?.file || uploadResponse;
+        uploadedImageUrl = uploadResponse?.imageUrl || uploadResponse?.url || uploadResponse?.image || uploadResponse?.filename || uploadResponse;
+        uploadedImagePath = uploadResponse?.imagePath;
       }
 
       const payload: any = {
         categoryId,
-        name,
-        description,
-        price: parseFloat(price)
+        name: name.trim(),
+        description: description.trim(),
+        price: parseFloat(price),
+        isActive,
+        isAvailable: true
       };
 
-      if (uploadedImage) {
-        payload.imageUrl = uploadedImage;
+      if (uploadedImageUrl) {
+        payload.imageUrl = uploadedImageUrl;
+      }
+      if (uploadedImagePath) {
+        payload.imagePath = uploadedImagePath;
       }
 
       if (initialData) {
@@ -105,6 +116,7 @@ export function ProductModal({ open, categoryId, onClose, onSuccess, initialData
     setName('');
     setDescription('');
     setPrice('');
+    setIsActive(true);
     setFile(null);
     setPreview(null);
     onClose();
@@ -180,6 +192,18 @@ export function ProductModal({ open, categoryId, onClose, onSuccess, initialData
             onChange={(e) => setPrice(e.target.value)}
             disabled={loading}
             slotProps={{ htmlInput: { step: "0.01", min: "0" } }}
+          />
+
+          <FormControlLabel
+            control={
+              <Switch
+                checked={isActive}
+                onChange={(e) => setIsActive(e.target.checked)}
+                color="primary"
+                disabled={loading}
+              />
+            }
+            label={isActive ? "Produto Ativo (disponível para pedidos)" : "Produto Pausado (indisponível)"}
           />
 
         </Box>

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Typography, Button, IconButton, Divider, Accordion, AccordionSummary, AccordionDetails, TextField } from '@mui/material';
+import { Box, Typography, Button, IconButton, Divider, Accordion, AccordionSummary, AccordionDetails, TextField, FormControlLabel, Switch } from '@mui/material';
 import AddCircleOutlinedIcon from '@mui/icons-material/AddCircleOutlined';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -88,11 +88,27 @@ export function CategoryList({
                 </Typography>
               )}
               
-              <Box onClick={(e) => e.stopPropagation()}>
-                <IconButton component="div" size="small" color="primary" onClick={() => onEditCategory(category)}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }} onClick={(e) => e.stopPropagation()}>
+                <FormControlLabel
+                  sx={{ mr: 1, my: 0 }}
+                  control={
+                    <Switch
+                      size="small"
+                      checked={category.isActive !== false}
+                      onChange={(e) => onUpdateCategory(category.id, { isActive: e.target.checked })}
+                      color="primary"
+                    />
+                  }
+                  label={
+                    <Typography variant="caption" sx={{ color: category.isActive !== false ? 'success.main' : 'text.disabled', fontWeight: 'bold' }}>
+                      {category.isActive !== false ? 'Ativa' : 'Pausada'}
+                    </Typography>
+                  }
+                />
+                <IconButton component="div" size="small" color="primary" onClick={() => onEditCategory(category)} title="Editar Categoria">
                   <EditIcon fontSize="small" />
                 </IconButton>
-                <IconButton component="div" size="small" color="error" onClick={() => onDeleteCategory(category.id)}>
+                <IconButton component="div" size="small" color="error" onClick={() => onDeleteCategory(category.id)} title="Excluir Categoria">
                   <DeleteIcon fontSize="small" />
                 </IconButton>
                 <Button 

@@ -21,10 +21,37 @@ export default function Catalogo() {
   const [categoryToEdit, setCategoryToEdit] = useState<any>(null);
   const [productToEdit, setProductToEdit] = useState<any>(null);
 
+  // Função para ordenar itens: mais novos sempre no topo (createdAt desc) e ordem estável
+  const sortCatalogItems = (data: any[]) => {
+    if (!Array.isArray(data)) return [];
+
+    return data
+      .map((cat: any) => {
+        const products = Array.isArray(cat.products) ? [...cat.products] : [];
+        products.sort((a: any, b: any) => {
+          if (a.createdAt && b.createdAt) {
+            return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+          }
+          if (a.createdAt) return -1;
+          if (b.createdAt) return 1;
+          return String(b.id || '').localeCompare(String(a.id || ''));
+        });
+        return { ...cat, products };
+      })
+      .sort((a: any, b: any) => {
+        if (a.createdAt && b.createdAt) {
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        }
+        if (a.createdAt) return -1;
+        if (b.createdAt) return 1;
+        return String(b.id || '').localeCompare(String(a.id || ''));
+      });
+  };
+
   const fetchCatalog = async () => {
     try {
       const data = await getData(locations.categories);
-      setCategories(data);
+      setCategories(sortCatalogItems(data));
     } catch (error) {
       console.error('Erro ao buscar catálogo', error);
     }
@@ -69,8 +96,11 @@ export default function Catalogo() {
 
   const handleUpdateCategory = async (categoryId: string, payload: any) => {
     try {
+      setCategories(prev => prev.map(cat => 
+        cat.id === categoryId ? { ...cat, ...payload } : cat
+      ));
       await patchData(`${locations.categories}/${categoryId}`, payload);
-      fetchCatalog();
+      await fetchCatalog();
     } catch (error) {
       console.error('Erro ao atualizar categoria', error);
       alert('Não foi possível atualizar a categoria.');
@@ -79,8 +109,14 @@ export default function Catalogo() {
 
   const handleUpdateProduct = async (productId: string, payload: any) => {
     try {
+      setCategories(prev => prev.map(cat => ({
+        ...cat,
+        products: (cat.products || []).map((p: any) => 
+          p.id === productId ? { ...p, ...payload } : p
+        )
+      })));
       await patchData(`${locations.products}/${productId}`, payload);
-      fetchCatalog();
+      await fetchCatalog();
     } catch (error) {
       console.error('Erro ao atualizar produto', error);
       alert('Não foi possível atualizar o produto.');
