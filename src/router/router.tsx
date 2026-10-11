@@ -31,4 +31,10 @@ export const appRoutes = [
     isPrivate: true,
     noLayout: true
   },
+  {
+    path: '/pagamento/:orderId',
+    element: lazy(() => import('../pages/PagamentoPix/PagamentoPix')),
+    isPrivate: true,
+    noLayout: true
+  },
 ];
