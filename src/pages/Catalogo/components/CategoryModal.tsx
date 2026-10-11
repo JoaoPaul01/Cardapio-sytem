@@ -59,7 +59,7 @@ export function CategoryModal({ open, onClose, onSuccess, initialData }: Categor
 
   return (
     <Dialog open={open} onClose={handleCancel} fullWidth maxWidth="sm">
-      <DialogTitle>{initialData ? 'Editar Categoria' : 'Nova Categoria'}</DialogTitle>
+      <DialogTitle sx={{ color: 'black' }}>{initialData ? 'Editar Categoria' : 'Nova Categoria'}</DialogTitle>
       <DialogContent>
         <TextField
           autoFocus

@@ -3,6 +3,7 @@ import { Card, CardContent, Typography, Box, IconButton, TextField, InputAdornme
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import { useAppContext } from '../../../context/appContext';
+import { locations } from '../../../services/locations';
 
 interface ProductItemProps {
   product: any;
@@ -54,11 +55,12 @@ export function ProductItem({ product, onEdit, onDelete, onUpdate }: ProductItem
     if (e.target.files && e.target.files[0] && onUpdate) {
       const file = e.target.files[0];
       try {
-        // Upload the image assuming the endpoint exists
-        await uploadImageData(`products/${product.id}/image`, file);
-        // Refresh component or image URL if available
-        // onUpdate can trigger a re-fetch in the parent
-        onUpdate({}); 
+        const uploadResponse = await uploadImageData('upload', file);
+        const uploadedImage = uploadResponse?.imageUrl || uploadResponse?.url || uploadResponse?.image || uploadResponse?.filename || uploadResponse?.id || uploadResponse?.file || uploadResponse;
+        
+        if (uploadedImage) {
+          onUpdate({ imageUrl: uploadedImage });
+        }
       } catch (err) {
         console.error('Erro ao fazer upload da imagem', err);
       }
@@ -88,8 +90,15 @@ export function ProductItem({ product, onEdit, onDelete, onUpdate }: ProductItem
         onDoubleClick={handleImageDoubleClick}
         title="Clique duas vezes para alterar a imagem"
       >
-        {/* Aqui exibiríamos a imagem real se houvesse a URL na resposta da API */}
-        Sem Foto
+        {product.imageUrl ? (
+          <img 
+            src={product.imageUrl} 
+            alt={product.name} 
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+          />
+        ) : (
+          "Sem Foto"
+        )}
         <input 
           type="file" 
           hidden 

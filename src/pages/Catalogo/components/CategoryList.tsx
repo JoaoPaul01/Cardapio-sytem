@@ -89,13 +89,14 @@ export function CategoryList({
               )}
               
               <Box onClick={(e) => e.stopPropagation()}>
-                <IconButton size="small" color="primary" onClick={() => onEditCategory(category)}>
+                <IconButton component="div" size="small" color="primary" onClick={() => onEditCategory(category)}>
                   <EditIcon fontSize="small" />
                 </IconButton>
-                <IconButton size="small" color="error" onClick={() => onDeleteCategory(category.id)}>
+                <IconButton component="div" size="small" color="error" onClick={() => onDeleteCategory(category.id)}>
                   <DeleteIcon fontSize="small" />
                 </IconButton>
                 <Button 
+                  component="div"
                   variant="text" 
                   size="small"
                   startIcon={<AddCircleOutlinedIcon />}

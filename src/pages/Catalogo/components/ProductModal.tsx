@@ -39,8 +39,8 @@ export function ProductModal({ open, categoryId, onClose, onSuccess, initialData
       setName(initialData.name || '');
       setDescription(initialData.description || '');
       setPrice(initialData.price?.toString() || '');
-      // If we had image URLs from the API, we could set preview here
-      setPreview(null); 
+      // Set preview for existing image if any
+      setPreview(initialData.imageUrl || null); 
     } else {
       setName('');
       setDescription('');
@@ -63,12 +63,27 @@ export function ProductModal({ open, categoryId, onClose, onSuccess, initialData
     
     setLoading(true);
     try {
-      const payload = {
+      let uploadedImage = initialData?.imageUrl || '';
+
+      // Se houver arquivo selecionado, faz o upload primeiro
+      if (file) {
+        // O upload envia o arquivo para a API via POST. Ao retornar o nome, o Patch/Post finaliza salvando os dados
+        const uploadResponse = await uploadImageData('upload', file);
+        
+        // Pega o retorno do backend e salva na variável
+        uploadedImage = uploadResponse?.imageUrl || uploadResponse?.url || uploadResponse?.image || uploadResponse?.filename || uploadResponse?.id || uploadResponse?.file || uploadResponse;
+      }
+
+      const payload: any = {
         categoryId,
         name,
         description,
         price: parseFloat(price)
       };
+
+      if (uploadedImage) {
+        payload.imageUrl = uploadedImage;
+      }
 
       if (initialData) {
         await patchData(`${locations.products}/${initialData.id}`, payload);
