@@ -66,9 +66,11 @@ export const PixPaymentCard: React.FC<PixPaymentCardProps> = ({
   const [copied, setCopied] = useState<boolean>(false);
   const [showSnackbar, setShowSnackbar] = useState<boolean>(false);
 
-  // Refs para controle de timers
+  // Refs para controle de timers e concorrência
   const countdownIntervalRef = useRef<any>(null);
   const pollingIntervalRef = useRef<any>(null);
+  const isCheckingRef = useRef<boolean>(false);
+  const hasTriggeredSuccessRef = useRef<boolean>(false);
 
   const clearTimers = useCallback(() => {
     if (countdownIntervalRef.current) {
@@ -83,10 +85,16 @@ export const PixPaymentCard: React.FC<PixPaymentCardProps> = ({
 
   // Busca detalhes da comanda e gera o QR Code inicial
   const generateQrCode = useCallback(async () => {
+    clearTimers();
     setLoading(true);
     setError('');
     setIsExpired(false);
+    setIsPaid(false);
+    setCopied(false);
+    setQrResponse(null);
     setTimeLeft(TOTAL_COUNTDOWN_SECONDS);
+    hasTriggeredSuccessRef.current = false;
+    isCheckingRef.current = false;
 
     try {
       // 1. Verifica se a comanda já está paga
@@ -158,7 +166,7 @@ export const PixPaymentCard: React.FC<PixPaymentCardProps> = ({
 
   // Polling de verificação de status (a cada 3 a 5 segundos)
   useEffect(() => {
-    if (loading || isPaid || !qrResponse) {
+    if (loading || isPaid || isExpired || error || !qrResponse) {
       if (pollingIntervalRef.current) {
         clearInterval(pollingIntervalRef.current);
         pollingIntervalRef.current = null;
@@ -167,15 +175,34 @@ export const PixPaymentCard: React.FC<PixPaymentCardProps> = ({
     }
 
     const checkOrderStatus = async () => {
+      if (isCheckingRef.current) return;
+      isCheckingRef.current = true;
+
       try {
-        const order = await getData(locations.orderById(orderId));
-        if (order && order.status === 'PAID') {
+        const res = await getData(locations.orderStatusMp(orderId));
+        if (res?.status === 'pago') {
           clearTimers();
           setIsPaid(true);
+        } else if (res?.status === 'expirado') {
+          clearTimers();
+          setIsExpired(true);
+        } else if (res?.status === 'cancelado') {
+          clearTimers();
+          setError('O pedido foi cancelado no Mercado Pago.');
         }
       } catch (err) {
-        // Falha transitória de rede no polling não deve interromper o fluxo
-        console.warn('Verificação de status da comanda falhou:', err);
+        // Fallback: tenta buscar a comanda local diretamente
+        try {
+          const fallbackOrder = await getData(locations.orderById(orderId));
+          if (fallbackOrder?.status === 'PAID') {
+            clearTimers();
+            setIsPaid(true);
+          }
+        } catch {
+          // ignora erro transitório
+        }
+      } finally {
+        isCheckingRef.current = false;
       }
     };
 
@@ -187,19 +214,22 @@ export const PixPaymentCard: React.FC<PixPaymentCardProps> = ({
         pollingIntervalRef.current = null;
       }
     };
-  }, [loading, isPaid, qrResponse, getData, orderId, clearTimers]);
+  }, [loading, isPaid, isExpired, error, qrResponse, getData, orderId, clearTimers]);
 
-  // Efeito ao confirmar o pagamento
+  // Efeito ao confirmar o pagamento (dispara uma única vez)
   useEffect(() => {
     if (isPaid) {
       clearTimers();
-      if (onSuccess) {
-        onSuccess();
+      if (!hasTriggeredSuccessRef.current) {
+        hasTriggeredSuccessRef.current = true;
+        if (onSuccess) {
+          onSuccess();
+        }
       }
 
       if (autoRedirect) {
         const timer = setTimeout(() => {
-          navigate('/historico');
+          navigate('/mesas');
         }, redirectDelayMs);
         return () => clearTimeout(timer);
       }
@@ -318,10 +348,10 @@ export const PixPaymentCard: React.FC<PixPaymentCardProps> = ({
           color="success"
           fullWidth
           size="large"
-          onClick={() => navigate('/historico')}
+          onClick={() => navigate('/mesas')}
           sx={{ borderRadius: 2, textTransform: 'none', fontWeight: 'bold', py: 1.2 }}
         >
-          Ir para Histórico de Pedidos
+          Ir para Painel de Mesas
         </Button>
 
         <style>

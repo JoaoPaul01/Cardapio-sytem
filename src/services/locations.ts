@@ -6,6 +6,7 @@ export const locations = {
   orders: 'orders',
   orderQrCode: (orderId: string) => `orders/${orderId}/qrcode-mercadopago`,
   orderById: (orderId: string) => `orders/${orderId}`,
+  orderStatusMp: (orderId: string) => `orders/${orderId}/status-mp`,
   tables: 'tables',
   estoque: 'estoque',
   UPLOAD_URL: 'http://localhost:3333',
