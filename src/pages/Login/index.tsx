@@ -52,8 +52,10 @@ export function Login() {
   return (
     <Box
       sx={{
+        height: '100dvh',
         minHeight: '100vh',
         width: '100%',
+        maxWidth: '100vw',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -61,55 +63,34 @@ export function Login() {
         position: 'relative',
         background: 'radial-gradient(circle at 10% 20%, #222332 0%, #151620 50%, #0d0e15 100%)',
         overflow: 'hidden',
-        '&::before': {
-          content: '""',
-          position: 'absolute',
-          top: '-15%',
-          right: '-10%',
-          width: { xs: 300, sm: 500 },
-          height: { xs: 300, sm: 500 },
-          borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(230, 81, 0, 0.15) 0%, rgba(0,0,0,0) 70%)',
-          pointerEvents: 'none',
-        },
-        '&::after': {
-          content: '""',
-          position: 'absolute',
-          bottom: '-20%',
-          left: '-10%',
-          width: { xs: 350, sm: 600 },
-          height: { xs: 350, sm: 600 },
-          borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(25, 118, 210, 0.12) 0%, rgba(0,0,0,0) 70%)',
-          pointerEvents: 'none',
-        }
+        boxSizing: 'border-box'
       }}
     >
       <Card
-        elevation={10}
+        elevation={8}
         sx={{
           width: '100%',
-          maxWidth: 440,
-          borderRadius: 4,
+          maxWidth: { xs: 380, sm: 420 },
+          borderRadius: 3.5,
           bgcolor: '#ffffff',
           position: 'relative',
-          overflow: 'visible',
-          boxShadow: '0 20px 50px rgba(0, 0, 0, 0.45)',
-          border: '1px solid rgba(255, 255, 255, 0.08)'
+          overflow: 'hidden',
+          boxShadow: '0 16px 40px rgba(0, 0, 0, 0.4)',
+          border: 'none',
+          boxSizing: 'border-box'
         }}
       >
         {/* Cabeçalho do Card */}
         <Box
           sx={{
             background: 'linear-gradient(135deg, #1e1e2d 0%, #26273b 100%)',
-            pt: { xs: 3.5, sm: 4 },
-            pb: { xs: 2.5, sm: 3 },
+            pt: { xs: 3, sm: 3.5 },
+            pb: { xs: 2.2, sm: 2.8 },
             px: { xs: 2.5, sm: 3 },
-            borderTopLeftRadius: 16,
-            borderTopRightRadius: 16,
             color: '#fff',
             textAlign: 'center',
-            position: 'relative'
+            position: 'relative',
+            borderBottom: 'none'
           }}
         >
           {/* Badge de Destaque */}
@@ -123,14 +104,14 @@ export function Login() {
               fontWeight: 700,
               letterSpacing: 1,
               fontSize: '0.68rem',
-              mb: 1.5,
+              mb: 1.2,
               border: '1px solid rgba(255, 183, 77, 0.25)'
             }}
           />
 
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1.2 }}>
-            <RestaurantMenuIcon sx={{ fontSize: { xs: 26, sm: 30 }, color: '#ff9800' }} />
-            <Typography variant="h5" sx={{ fontWeight: 800, letterSpacing: -0.5, fontSize: { xs: '1.25rem', sm: '1.5rem' } }}>
+            <RestaurantMenuIcon sx={{ fontSize: { xs: 26, sm: 28 }, color: '#ff9800' }} />
+            <Typography variant="h5" sx={{ fontWeight: 800, letterSpacing: -0.5, fontSize: { xs: '1.25rem', sm: '1.45rem' } }}>
               Cardápio Digital
             </Typography>
           </Box>
@@ -141,7 +122,7 @@ export function Login() {
         </Box>
 
         {/* Formulário */}
-        <CardContent sx={{ p: { xs: 3, sm: 4 } }}>
+        <CardContent sx={{ p: { xs: 2.5, sm: 3.5 }, '&:last-child': { pb: { xs: 2.5, sm: 3.5 } } }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2.5 }}>
             <ReceiptLongIcon sx={{ color: 'primary.main', fontSize: 22 }} />
             <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#2d3748' }}>
