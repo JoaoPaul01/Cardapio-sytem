@@ -11,6 +11,11 @@ export const appRoutes = [
     isPrivate: true 
   },
   { 
+    path: '/mesas', 
+    element: Mesas, 
+    isPrivate: true 
+  },
+  { 
     path: '/catalogo', 
     element: Catalogo, 
     isPrivate: true 

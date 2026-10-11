@@ -61,8 +61,8 @@ export default function MesaView() {
   const [isPixDialogOpen, setPixDialogOpen] = useState(false);
   const [pixOrderId, setPixOrderId] = useState<string | null>(null);
 
-  const fetchData = useCallback(async () => {
-    setLoading(true);
+  const fetchData = useCallback(async (silent = false) => {
+    if (!silent) setLoading(true);
     setLoadError('');
     try {
       const [categoriesData, mesaData] = await Promise.all([
@@ -75,7 +75,7 @@ export default function MesaView() {
       console.error('Erro ao carregar dados da mesa', error);
       setLoadError(error?.response?.data?.error || 'Não foi possível carregar o cardápio.');
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   }, [getData, id]);
 
@@ -133,7 +133,7 @@ export default function MesaView() {
       setSuccessDialogOpen(true);
       setTimeout(() => {
         setSuccessDialogOpen(false);
-        navigate('/historico');
+        navigate('/mesas');
       }, 2500);
     } catch (error: any) {
       console.error('Erro ao finalizar pedido', error);
@@ -380,7 +380,7 @@ export default function MesaView() {
           )}
 
           {loadError && (
-            <Alert severity="error" sx={{ mb: 3 }} action={<Button color="inherit" onClick={fetchData}>Tentar novamente</Button>}>
+            <Alert severity="error" sx={{ mb: 3 }} action={<Button color="inherit" onClick={() => fetchData()}>Tentar novamente</Button>}>
               {loadError}
             </Alert>
           )}
@@ -464,7 +464,13 @@ export default function MesaView() {
         orderId={pixOrderId}
         onClose={() => setPixDialogOpen(false)}
         onSuccess={() => {
-          fetchData();
+          setPixDialogOpen(false);
+          fetchData(true);
+          setSuccessDialogOpen(true);
+          setTimeout(() => {
+            setSuccessDialogOpen(false);
+            navigate('/mesas');
+          }, 2500);
         }}
       />
 
