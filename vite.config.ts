@@ -20,12 +20,12 @@ export default defineConfig({
         orientation: 'portrait',
         icons: [
           {
-            src: 'https://cdn-icons-png.flaticon.com/512/3135/3135695.png', // Ícone genérico provisório de comida
+            src: '/icon-192x192.png',
             sizes: '192x192',
             type: 'image/png'
           },
           {
-            src: 'https://cdn-icons-png.flaticon.com/512/3135/3135695.png',
+            src: '/icon-512x512.png',
             sizes: '512x512',
             type: 'image/png'
           }
