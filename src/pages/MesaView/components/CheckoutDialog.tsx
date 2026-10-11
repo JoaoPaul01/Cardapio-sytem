@@ -1,6 +1,6 @@
 import React from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, Box, Divider } from '@mui/material';
-import qrcodeImg from '../../../image/QRCODE-PIX.jpeg';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, Box, Divider, Alert } from '@mui/material';
+import QrCode2Icon from '@mui/icons-material/QrCode2';
 
 interface CartItem {
   product: any;
@@ -13,11 +13,17 @@ interface CheckoutDialogProps {
   onClose: () => void;
   cartItems: CartItem[];
   onFinish: () => void;
+  onPayPix?: () => void;
 }
 
-export const CheckoutDialog: React.FC<CheckoutDialogProps> = ({ open, onClose, cartItems, onFinish }) => {
+export const CheckoutDialog: React.FC<CheckoutDialogProps> = ({
+  open,
+  onClose,
+  cartItems,
+  onFinish,
+  onPayPix,
+}) => {
   const total = cartItems.reduce((acc, item) => {
-    // Assuming product.price exists and is a number. If not, default to 0.
     const price = Number(item.product.price) || 0;
     return acc + price * item.qty;
   }, 0);
@@ -35,13 +41,17 @@ export const CheckoutDialog: React.FC<CheckoutDialogProps> = ({ open, onClose, c
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle sx={{color: 'black', fontSize: '1.1rem', fontWeight: 'bold'}}>Carrinho / Checkout</DialogTitle>
+      <DialogTitle sx={{ color: 'black', fontSize: '1.1rem', fontWeight: 'bold' }}>
+        Carrinho / Checkout
+      </DialogTitle>
       <DialogContent dividers>
         {cartItems.length === 0 ? (
           <Typography variant="body2">Seu carrinho está vazio.</Typography>
         ) : (
           <Box sx={{ mb: 3 }}>
-            <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }} gutterBottom>Itens do Pedido</Typography>
+            <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }} gutterBottom>
+              Itens do Pedido
+            </Typography>
             {cartItems.map((item, idx) => (
               <Box key={idx} sx={{ mb: 1 }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -65,7 +75,9 @@ export const CheckoutDialog: React.FC<CheckoutDialogProps> = ({ open, onClose, c
         {cartItems.length > 0 && (
           <>
             <Divider sx={{ my: 1.5 }} />
-            <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }} gutterBottom>Resumo e Pagamento</Typography>
+            <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }} gutterBottom>
+              Resumo e Pagamento
+            </Typography>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
               <Typography variant="body2">Subtotal:</Typography>
               <Typography variant="body2" sx={{ fontWeight: 'bold' }}>{formatCurrency(total)}</Typography>
@@ -83,35 +95,46 @@ export const CheckoutDialog: React.FC<CheckoutDialogProps> = ({ open, onClose, c
               </Box>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 0.5 }}>
                 <Typography variant="body2" color="textSecondary">Pix (Sem taxa):</Typography>
-                <Typography variant="body2" color="textSecondary">{formatCurrency(totalPix)}</Typography>
+                <Typography variant="body2" sx={{ fontWeight: 'bold', color: 'success.main' }}>
+                  {formatCurrency(totalPix)}
+                </Typography>
               </Box>
             </Box>
 
-            <Box sx={{ mt: 2, p: 1.5, border: '1px solid #ccc', borderRadius: 2, textAlign: 'center' }}>
-              <img src={qrcodeImg} alt="QR Code Pix"
-                style={{ width: '150px', height: '150px', objectFit: 'contain', marginBottom: '4px' }} 
-              />
-              <Typography variant="caption" color="textSecondary" sx={{ display: 'block' }}>
-                Escaneie com o app do seu banco
-              </Typography>
-            </Box>
+            <Alert severity="info" icon={<QrCode2Icon />} sx={{ mt: 2.5, borderRadius: 2 }}>
+              Ao escolher <strong>Pagar com Pix</strong>, você receberá um QR Code dinâmico do <strong>Mercado Pago</strong> com 10 minutos de validade e confirmação automática do pagamento.
+            </Alert>
           </>
         )}
       </DialogContent>
-      <DialogActions>
+      <DialogActions sx={{ px: 3, py: 2, gap: 1, flexWrap: 'wrap' }}>
         <Button onClick={onClose} color="inherit" size="small">
           Continuar comprando
         </Button>
         <Button 
           onClick={onFinish} 
-          variant="contained" 
-          color="success"
+          variant="outlined" 
+          color="inherit"
           disabled={cartItems.length === 0}
           size="small"
         >
-          Dar baixa
+          Dar baixa manual
         </Button>
+        {onPayPix && (
+          <Button 
+            onClick={onPayPix} 
+            variant="contained" 
+            color="primary"
+            startIcon={<QrCode2Icon />}
+            disabled={cartItems.length === 0}
+            size="small"
+            sx={{ fontWeight: 'bold' }}
+          >
+            Pagar com Pix (Mercado Pago)
+          </Button>
+        )}
       </DialogActions>
     </Dialog>
   );
 };
+

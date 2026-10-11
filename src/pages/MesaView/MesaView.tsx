@@ -24,11 +24,13 @@ import SearchIcon from '@mui/icons-material/Search';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import QrCode2Icon from '@mui/icons-material/QrCode2';
 
 import { useAppContext } from '../../context/appContext';
 import { locations } from '../../services/locations';
 import { ProductDialog } from './components/ProductDialog';
 import { CheckoutDialog } from './components/CheckoutDialog';
+import { PixPaymentDialog } from '../../components/PixPayment/PixPaymentDialog';
 
 interface CartItem {
   product: any;
@@ -56,6 +58,8 @@ export default function MesaView() {
   const [isProductDialogOpen, setProductDialogOpen] = useState(false);
   const [isCheckoutDialogOpen, setCheckoutDialogOpen] = useState(false);
   const [isSuccessDialogOpen, setSuccessDialogOpen] = useState(false);
+  const [isPixDialogOpen, setPixDialogOpen] = useState(false);
+  const [pixOrderId, setPixOrderId] = useState<string | null>(null);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -134,6 +138,62 @@ export default function MesaView() {
     } catch (error: any) {
       console.error('Erro ao finalizar pedido', error);
       alert(error?.response?.data?.error || 'Erro ao finalizar o pedido. Verifique se a mesa já possui uma comanda aberta.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePayWithPix = async () => {
+    if (!mesa) return;
+
+    // Se a mesa já possui comanda aberta
+    if (mesa.activeOrder) {
+      setLoading(true);
+      try {
+        if (cartItems.length > 0) {
+          const itemsPayload = cartItems.map(item => ({
+            productId: item.product.id,
+            quantity: item.qty,
+            notes: item.observations || ''
+          }));
+          await postData(`${locations.orders}/${mesa.activeOrder.id}/items`, { items: itemsPayload });
+          setCartItems([]);
+        }
+        setCheckoutDialogOpen(false);
+        setPixOrderId(mesa.activeOrder.id);
+        setPixDialogOpen(true);
+      } catch (error: any) {
+        console.error('Erro ao adicionar itens e gerar Pix', error);
+        alert(error?.response?.data?.error || 'Erro ao preparar pagamento Pix.');
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
+
+    if (cartItems.length === 0) return;
+
+    setLoading(true);
+    setLoadError('');
+    try {
+      const itemsPayload = cartItems.map(item => ({
+        productId: item.product.id,
+        quantity: item.qty,
+        notes: item.observations || ''
+      }));
+
+      const newOrder = await postData(locations.orders, {
+        tableId: mesa.id,
+        items: itemsPayload
+      });
+
+      setCartItems([]);
+      setCheckoutDialogOpen(false);
+      setPixOrderId(newOrder.id);
+      setPixDialogOpen(true);
+    } catch (error: any) {
+      console.error('Erro ao abrir comanda para pagamento Pix', error);
+      alert(error?.response?.data?.error || 'Erro ao processar pedido.');
     } finally {
       setLoading(false);
     }
@@ -257,7 +317,36 @@ export default function MesaView() {
 
         {/* Scrollable Content */}
         <Box sx={{ flex: 1, overflowY: 'auto', p: 3 }}>
-          {/* Banner */}
+          {/* Banner de Comanda Aberta */}
+          {mesa?.activeOrder && (
+            <Alert
+              severity="warning"
+              icon={<QrCode2Icon />}
+              action={
+                <Button
+                  color="inherit"
+                  size="small"
+                  variant="outlined"
+                  sx={{ fontWeight: 'bold' }}
+                  onClick={() => {
+                    setPixOrderId(mesa.activeOrder.id);
+                    setPixDialogOpen(true);
+                  }}
+                >
+                  Pagar via Pix (Mercado Pago)
+                </Button>
+              }
+              sx={{ mb: 3, borderRadius: 2 }}
+            >
+              Esta mesa possui comanda aberta no valor de{' '}
+              <strong>
+                {Number(mesa.activeOrder.totalAmount || 0).toLocaleString('pt-BR', {
+                  style: 'currency',
+                  currency: 'BRL',
+                })}
+              </strong>
+            </Alert>
+          )}
 
           {/* Category Selector */}
           {!loading && !loadError && categories.length > 0 && (
@@ -367,6 +456,16 @@ export default function MesaView() {
         cartItems={cartItems}
         onClose={() => setCheckoutDialogOpen(false)}
         onFinish={handleFinishCheckout}
+        onPayPix={handlePayWithPix}
+      />
+
+      <PixPaymentDialog
+        open={isPixDialogOpen}
+        orderId={pixOrderId}
+        onClose={() => setPixDialogOpen(false)}
+        onSuccess={() => {
+          fetchData();
+        }}
       />
 
       {/* Success Dialog (Animation) */}

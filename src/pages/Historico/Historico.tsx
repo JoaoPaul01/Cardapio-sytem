@@ -5,8 +5,10 @@ import {
 } from '@mui/material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import SearchIcon from '@mui/icons-material/Search';
+import QrCode2Icon from '@mui/icons-material/QrCode2';
 import { useAppContext } from '../../context/appContext';
 import { locations } from '../../services/locations';
+import { PixPaymentDialog } from '../../components/PixPayment/PixPaymentDialog';
 
 const statusLabels: Record<string, { label: string; color: any }> = {
   OPEN: { label: 'EM ABERTO', color: 'info' },
@@ -26,6 +28,8 @@ export default function Historico() {
   
   const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
   const [openDialog, setOpenDialog] = useState(false);
+  const [openPixDialog, setOpenPixDialog] = useState(false);
+  const [pixOrderId, setPixOrderId] = useState<string | null>(null);
 
   const fetchOrders = useCallback(async () => {
     setLoading(true);
@@ -193,12 +197,36 @@ export default function Historico() {
             </Box>
           )}
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDetails} variant="contained">
+        <DialogActions sx={{ px: 3, py: 2, gap: 1 }}>
+          <Button onClick={handleCloseDetails} color="inherit">
             Fechar
           </Button>
+          {selectedOrder && selectedOrder.status !== 'PAID' && selectedOrder.status !== 'CANCELED' && (
+            <Button
+              variant="contained"
+              color="primary"
+              startIcon={<QrCode2Icon />}
+              onClick={() => {
+                setPixOrderId(selectedOrder.id);
+                setOpenPixDialog(true);
+              }}
+              sx={{ fontWeight: 'bold' }}
+            >
+              Pagar via Pix (Mercado Pago)
+            </Button>
+          )}
         </DialogActions>
       </Dialog>
+
+      <PixPaymentDialog
+        open={openPixDialog}
+        orderId={pixOrderId}
+        onClose={() => setOpenPixDialog(false)}
+        onSuccess={() => {
+          fetchOrders();
+          setOpenDialog(false);
+        }}
+      />
     </Box>
   );
 }
