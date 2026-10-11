@@ -201,21 +201,24 @@ export default function MesaView() {
 
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
 
-  const filteredCategories = categories.map(cat => {
-    const products = cat.products || [];
-    const filteredProducts = products.filter((p: any) =>
-      p.name.toLowerCase().includes(filterText.toLowerCase()) ||
-      cat.name.toLowerCase().includes(filterText.toLowerCase())
-    );
-    return { ...cat, products: filteredProducts };
-  }).filter(cat => {
-    // text filter
-    const matchesText = cat.name.toLowerCase().includes(filterText.toLowerCase()) || (cat.products && cat.products.length > 0);
-    // category selection filter
-    const matchesCategory = selectedCategory === 'ALL' || cat.id === selectedCategory;
-    
-    return matchesText && matchesCategory;
-  });
+  // Filtra categorias e produtos ativos para exibição no cardápio do cliente
+  const filteredCategories = categories
+    .filter(cat => cat.isActive !== false) // Oculta categorias pausadas
+    .map(cat => {
+      const products = (cat.products || []).filter((p: any) => p.isActive !== false); // Oculta produtos pausados
+      const filteredProducts = products.filter((p: any) =>
+        p.name.toLowerCase().includes(filterText.toLowerCase()) ||
+        cat.name.toLowerCase().includes(filterText.toLowerCase())
+      );
+      return { ...cat, products: filteredProducts };
+    }).filter(cat => {
+      // text filter
+      const matchesText = cat.name.toLowerCase().includes(filterText.toLowerCase()) || (cat.products && cat.products.length > 0);
+      // category selection filter
+      const matchesCategory = selectedCategory === 'ALL' || cat.id === selectedCategory;
+      
+      return matchesText && matchesCategory;
+    });
 
   const cartTotalItems = cartItems.reduce((acc, item) => acc + item.qty, 0);
 
@@ -405,11 +408,11 @@ export default function MesaView() {
               </Typography>
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
                 {category.products.map((product: any, pIdx: number) => (
-                  <Card
-                    key={product.id || pIdx}
-                    sx={{ width: 380, maxWidth: '100%' }}
-                  >
-                    <CardActionArea onClick={() => handleOpenProductDialog(product)} sx={{ display: 'flex', alignItems: 'stretch', justifyContent: 'space-between' }}>
+                  <Card key={product.id || pIdx} sx={{ width: 380, maxWidth: '100%' }}>
+                    <CardActionArea 
+                      onClick={() => handleOpenProductDialog(product)} 
+                      sx={{ display: 'flex', alignItems: 'stretch', justifyContent: 'space-between' }}
+                    >
                       <CardContent sx={{ flex: 1, minWidth: 0 }}>
                         <Typography variant="subtitle1" noWrap sx={{ fontWeight: 'bold' }}>{product.name}</Typography>
                         <Typography variant="body2" color="textSecondary" sx={{
@@ -427,6 +430,9 @@ export default function MesaView() {
                           image={product.imageUrl}
                           alt={product.name}
                           sx={{ width: 100, height: 100, objectFit: 'cover', borderRadius: 1, m: 1.5, alignSelf: 'center' }}
+                          onError={(e: any) => {
+                            e.currentTarget.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 24 24" fill="%239e9e9e"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>';
+                          }}
                         />
                       )}
                     </CardActionArea>

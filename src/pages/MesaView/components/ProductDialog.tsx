@@ -32,6 +32,7 @@ export const ProductDialog: React.FC<ProductDialogProps> = ({ open, product, onC
             {product.description}
           </Typography>
         )}
+
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
           <Typography variant="h6">Quantidade</Typography>
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -60,7 +61,7 @@ export const ProductDialog: React.FC<ProductDialogProps> = ({ open, product, onC
       <Stack
         direction="row"
         spacing={1}
-        sx={{ justifyContent: 'flex-end' }}
+        sx={{ justifyContent: 'flex-end', p: 2 }}
       >
         <Button
           onClick={() => onAdd(product, qty, observations, false)}

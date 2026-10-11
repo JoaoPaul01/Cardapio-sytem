@@ -15,7 +15,6 @@ import DashboardIcon from '@mui/icons-material/Dashboard';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
 import LogoutIcon from '@mui/icons-material/Logout';
 import HistoryIcon from '@mui/icons-material/History';
-import InventoryIcon from '@mui/icons-material/Inventory';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAppContext } from '../../context/appContext';
 
@@ -102,23 +101,6 @@ export function Sidebar({ mobileOpen, handleDrawerToggle }: SidebarProps) {
                 <HistoryIcon />
               </ListItemIcon>
               <ListItemText primary="Histórico" sx={{ color: '#fff' }} />
-            </ListItemButton>
-          </ListItem>
-
-          {/* Estoque */}
-          <ListItem disablePadding>
-            <ListItemButton 
-              selected={location.pathname === '/estoque'} 
-              onClick={() => handleNavigation('/estoque')}
-              sx={{
-                '&.Mui-selected': { backgroundColor: 'rgba(255,255,255,0.1)' },
-                '&:hover': { backgroundColor: 'rgba(255,255,255,0.05)' }
-              }}
-            >
-              <ListItemIcon sx={{ color: '#fff' }}>
-                <InventoryIcon />
-              </ListItemIcon>
-              <ListItemText primary="Estoque (Atacado)" sx={{ color: '#fff' }} />
             </ListItemButton>
           </ListItem>
         </List>
