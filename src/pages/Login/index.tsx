@@ -98,19 +98,18 @@ export function Login() {
           border: '1px solid rgba(255, 255, 255, 0.08)'
         }}
       >
-        {/* Recorte decorativo estilo Comanda no topo */}
+        {/* Cabeçalho do Card */}
         <Box
           sx={{
-            background: 'linear-gradient(135deg, #1e1e2d 0%, #2a2b3d 100%)',
-            pt: 4,
-            pb: 3,
-            px: 3,
+            background: 'linear-gradient(135deg, #1e1e2d 0%, #26273b 100%)',
+            pt: { xs: 3.5, sm: 4 },
+            pb: { xs: 2.5, sm: 3 },
+            px: { xs: 2.5, sm: 3 },
             borderTopLeftRadius: 16,
             borderTopRightRadius: 16,
             color: '#fff',
             textAlign: 'center',
-            position: 'relative',
-            borderBottom: '2px dashed #e0e0e0'
+            position: 'relative'
           }}
         >
           {/* Badge de Destaque */}
@@ -119,24 +118,24 @@ export function Login() {
             label="CHURRASCARIA & COMANDA"
             size="small"
             sx={{
-              bgcolor: 'rgba(255, 255, 255, 0.1)',
+              bgcolor: 'rgba(255, 255, 255, 0.08)',
               color: '#ffb74d',
               fontWeight: 700,
-              letterSpacing: 1.2,
-              fontSize: '0.7rem',
+              letterSpacing: 1,
+              fontSize: '0.68rem',
               mb: 1.5,
-              border: '1px solid rgba(255, 183, 77, 0.3)'
+              border: '1px solid rgba(255, 183, 77, 0.25)'
             }}
           />
 
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1.2 }}>
-            <RestaurantMenuIcon sx={{ fontSize: 32, color: '#ff9800' }} />
-            <Typography variant="h5" sx={{ fontWeight: 800, letterSpacing: -0.5 }}>
+            <RestaurantMenuIcon sx={{ fontSize: { xs: 26, sm: 30 }, color: '#ff9800' }} />
+            <Typography variant="h5" sx={{ fontWeight: 800, letterSpacing: -0.5, fontSize: { xs: '1.25rem', sm: '1.5rem' } }}>
               Cardápio Digital
             </Typography>
           </Box>
 
-          <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.7)', mt: 0.8, display: 'block' }}>
+          <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.7)', mt: 0.8, display: 'block', fontSize: { xs: '0.75rem', sm: '0.8rem' } }}>
             Painel de Controle • Gestão de Mesas e Pedidos
           </Typography>
         </Box>
