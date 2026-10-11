@@ -408,33 +408,53 @@ export default function MesaView() {
               </Typography>
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
                 {category.products.map((product: any, pIdx: number) => (
-                  <Card key={product.id || pIdx} sx={{ width: 380, maxWidth: '100%' }}>
+                  <Card key={product.id || pIdx} sx={{ width: 380, maxWidth: '100%', borderRadius: 2 }}>
                     <CardActionArea 
                       onClick={() => handleOpenProductDialog(product)} 
-                      sx={{ display: 'flex', alignItems: 'stretch', justifyContent: 'space-between' }}
+                      sx={{ display: 'flex', alignItems: 'center', p: 1.5, gap: 1.5, justifyContent: 'flex-start' }}
                     >
-                      <CardContent sx={{ flex: 1, minWidth: 0 }}>
-                        <Typography variant="subtitle1" noWrap sx={{ fontWeight: 'bold' }}>{product.name}</Typography>
-                        <Typography variant="body2" color="textSecondary" sx={{
-                          display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden'
-                        }}>
-                          {product.description || 'Sem descrição'}
-                        </Typography>
-                        <Typography variant="subtitle1" color="primary" sx={{ mt: 1, fontWeight: 'bold' }}>
-                          {Number(product.price || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-                        </Typography>
-                      </CardContent>
-                      {product.imageUrl && (
+                      {/* Imagem do produto à esquerda */}
+                      {product.imageUrl ? (
                         <CardMedia
                           component="img"
                           image={product.imageUrl}
                           alt={product.name}
-                          sx={{ width: 100, height: 100, objectFit: 'cover', borderRadius: 1, m: 1.5, alignSelf: 'center' }}
+                          sx={{ width: { xs: 75, sm: 85 }, height: { xs: 75, sm: 85 }, minWidth: { xs: 75, sm: 85 }, objectFit: 'cover', borderRadius: 2 }}
                           onError={(e: any) => {
                             e.currentTarget.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 24 24" fill="%239e9e9e"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>';
                           }}
                         />
+                      ) : (
+                        <Box sx={{
+                          width: { xs: 75, sm: 85 },
+                          height: { xs: 75, sm: 85 },
+                          minWidth: { xs: 75, sm: 85 },
+                          backgroundColor: '#f0f0f0',
+                          borderRadius: 2,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          color: '#9e9e9e',
+                          fontSize: '0.75rem',
+                          fontWeight: 500
+                        }}>
+                          Sem Foto
+                        </Box>
                       )}
+
+                      <CardContent sx={{ flex: 1, minWidth: 0, p: 0, '&:last-child': { pb: 0 } }}>
+                        <Typography variant="subtitle1" noWrap sx={{ fontWeight: 'bold', fontSize: { xs: '0.95rem', sm: '1rem' } }}>
+                          {product.name}
+                        </Typography>
+                        <Typography variant="body2" color="textSecondary" sx={{
+                          display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', minHeight: 18, fontSize: { xs: '0.8rem', sm: '0.85rem' }
+                        }}>
+                          {product.description || 'Sem descrição'}
+                        </Typography>
+                        <Typography variant="subtitle1" color="primary" sx={{ mt: 0.5, fontWeight: 'bold', fontSize: { xs: '0.95rem', sm: '1.05rem' } }}>
+                          {Number(product.price || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                        </Typography>
+                      </CardContent>
                     </CardActionArea>
                   </Card>
                 ))}
