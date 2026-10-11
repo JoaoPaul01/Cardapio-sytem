@@ -109,12 +109,12 @@ export default function Mesas() {
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, color: "black" }}>
-        <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: { xs: 2, sm: 3 }, color: "black", flexWrap: 'wrap', gap: 1 }}>
+        <Typography variant="h4" sx={{ fontWeight: 'bold', fontSize: { xs: '1.6rem', sm: '2.125rem' } }}>
           Mesas
         </Typography>
-        <Button variant="contained" startIcon={<AddIcon />} onClick={() => setOpenDialog(true)}>
-        <Typography sx={{color: "black"}}>Criar uma mesa </Typography>
+        <Button variant="contained" size="small" startIcon={<AddIcon />} onClick={() => setOpenDialog(true)} sx={{ textTransform: 'none', fontWeight: 600 }}>
+          Criar mesa
         </Button>
       </Box>
 
@@ -129,32 +129,32 @@ export default function Mesas() {
           <CircularProgress />
         </Box>
       ) : (
-        <Grid container spacing={3}>
+        <Grid container spacing={{ xs: 1.5, sm: 2.5, md: 3 }}>
           {mesas.map((mesa) => {
             const status = statusLabel[mesa.status] || { label: mesa.status, color: 'default' as const };
             return (
-              <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }} key={mesa.id}>
-                <Card elevation={3} sx={{ borderRadius: 2, position: 'relative' }}>
+              <Grid size={{ xs: 6, sm: 6, md: 4, lg: 3 }} key={mesa.id}>
+                <Card elevation={2} sx={{ borderRadius: 2, position: 'relative' }}>
                   <IconButton 
                     onClick={(e) => { e.stopPropagation(); setMesaToDelete(mesa); }} 
-                    sx={{ position: 'absolute', top: 8, right: 8, zIndex: 1 }}
+                    sx={{ position: 'absolute', top: 4, right: 4, zIndex: 1, p: 0.5 }}
                     color="error"
                     size="small"
                   >
-                    <DeleteIcon />
+                    <DeleteIcon sx={{ fontSize: { xs: 18, sm: 20 } }} />
                   </IconButton>
                   <CardActionArea
                     onClick={() => navigate(`/mesa/${mesa.id}`)}
-                    sx={{ p: 3, display: 'flex', flexDirection: 'column', alignItems: 'center' }}
+                    sx={{ p: { xs: 1.5, sm: 2.5 }, display: 'flex', flexDirection: 'column', alignItems: 'center' }}
                   >
-                    <TableBarIcon sx={{ fontSize: 60, color: 'primary.main', mb: 1 }} />
-                    <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                    <TableBarIcon sx={{ fontSize: { xs: 38, sm: 54 }, color: 'primary.main', mb: 0.5 }} />
+                    <Typography sx={{ fontWeight: 'bold', fontSize: { xs: '0.95rem', sm: '1.25rem' } }}>
                       Mesa {mesa.tableNumber}
                     </Typography>
-                    <Chip size="small" label={status.label} color={status.color} sx={{ mt: 1 }} />
+                    <Chip size="small" label={status.label} color={status.color} sx={{ mt: 0.8, height: { xs: 20, sm: 24 }, fontSize: { xs: '0.7rem', sm: '0.8125rem' } }} />
                     {mesa.activeOrder && (
-                      <Typography variant="body2" color="textSecondary" sx={{ mt: 1 }}>
-                        {mesa.activeOrder.itemsCount} itens • R$ {mesa.activeOrder.totalAmount}
+                      <Typography variant="caption" color="textSecondary" sx={{ mt: 0.8, textAlign: 'center', fontWeight: 500 }}>
+                        {mesa.activeOrder.itemsCount} {mesa.activeOrder.itemsCount === 1 ? 'item' : 'itens'} • R$ {mesa.activeOrder.totalAmount}
                       </Typography>
                     )}
                   </CardActionArea>

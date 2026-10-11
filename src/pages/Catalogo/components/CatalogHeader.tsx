@@ -11,23 +11,23 @@ interface CatalogHeaderProps {
 
 export function CatalogHeader({ filterText, onFilterChange, onNewCategory }: CatalogHeaderProps) {
   return (
-    <Box sx={{ mb: 4 }}>
-      <Typography variant="h4" sx={{ fontWeight: 'bold' }} gutterBottom>
+    <Box sx={{ mb: { xs: 2.5, sm: 4 } }}>
+      <Typography variant="h4" sx={{ fontWeight: 'bold', fontSize: { xs: '1.6rem', sm: '2.125rem' } }} gutterBottom>
         Catálogo
       </Typography>
 
       <Paper 
         elevation={2} 
         sx={{ 
-          p: 2, 
+          p: { xs: 1.5, sm: 2 }, 
           display: 'flex', 
-          gap: 2, 
-          alignItems: 'center', 
+          gap: { xs: 1.5, sm: 2 }, 
+          alignItems: { xs: 'stretch', sm: 'center' }, 
           justifyContent: 'space-between',
-          flexWrap: 'wrap'
+          flexDirection: { xs: 'column', sm: 'row' }
         }}
       >
-        <Box sx={{ display: 'flex', alignItems: 'flex-end', flexGrow: 1, maxWidth: 400 }}>
+        <Box sx={{ display: 'flex', alignItems: 'flex-end', flexGrow: 1, maxWidth: { xs: '100%', sm: 400 } }}>
           <SearchIcon sx={{ color: 'action.active', mr: 1, my: 0.5 }} />
           <TextField 
             label="Buscar produto ou categoria" 
@@ -43,6 +43,7 @@ export function CatalogHeader({ filterText, onFilterChange, onNewCategory }: Cat
           color="primary" 
           startIcon={<AddIcon />}
           onClick={onNewCategory}
+          sx={{ textTransform: 'none', fontWeight: 600, width: { xs: '100%', sm: 'auto' } }}
         >
           Criar Categoria
         </Button>

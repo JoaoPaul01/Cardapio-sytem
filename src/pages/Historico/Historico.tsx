@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import {
   Box, Typography, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  IconButton, Chip, CircularProgress, Alert, TextField, Dialog, DialogTitle, DialogContent, DialogActions, Button, Grid, InputAdornment
+  IconButton, Chip, CircularProgress, Alert, TextField, Dialog, DialogTitle, DialogContent, DialogActions, Button, Grid, InputAdornment, Divider
 } from '@mui/material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import SearchIcon from '@mui/icons-material/Search';
@@ -71,11 +71,11 @@ export default function Historico() {
   return (
     <Box>
       <Box sx={{ mb: 3 }}>
-        <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 2 }}>
+        <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 2, fontSize: { xs: '1.5rem', sm: '2.125rem' } }}>
           Histórico de Pedidos
         </Typography>
 
-        <Paper sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
+        <Paper sx={{ p: { xs: 1.5, sm: 2 }, display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
           <TextField
             size="small"
             placeholder="Pesquisar por Nº do pedido ou mesa..."
@@ -92,59 +92,116 @@ export default function Historico() {
 
         {error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}
 
-        <TableContainer component={Paper}>
-          {loading ? (
-            <Box sx={{ display: 'flex', justifyContent: 'center', py: 5 }}>
-              <CircularProgress />
-            </Box>
-          ) : (
-            <Table>
-              <TableHead sx={{ bgcolor: '#f4f6f8' }}>
-                <TableRow>
-                  <TableCell sx={{ fontWeight: 'bold' }}>PEDIDO</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold' }}>MESA</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold' }}>CLIENTE</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold' }}>STATUS</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold' }}>DATA/HORÁRIO</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold' }}>TOTAL</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold' }} align="center">AÇÕES</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {filteredOrders.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={7} align="center" sx={{ py: 3 }}>
-                      Nenhum pedido encontrado.
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  filteredOrders.map((order) => {
-                    const statusInfo = statusLabels[order.status] || { label: order.status, color: 'default' };
-                    return (
-                      <TableRow key={order.id} hover>
-                        <TableCell>{order.id.slice(0, 8).toUpperCase()}</TableCell>
-                        <TableCell>Mesa {order.tableNumber}</TableCell>
-                        <TableCell>{order.customerName || '-'}</TableCell>
-                        <TableCell>
-                          <Chip label={statusInfo.label} color={statusInfo.color} size="small" />
-                        </TableCell>
-                        <TableCell>{new Date(order.createdAt).toLocaleString('pt-BR')}</TableCell>
-                        <TableCell>
+        {loading ? (
+          <Box sx={{ display: 'flex', justifyContent: 'center', py: 5 }}>
+            <CircularProgress />
+          </Box>
+        ) : (
+          <>
+            {/* Versão Mobile: Cards com visual moderno e compacto */}
+            <Box sx={{ display: { xs: 'flex', md: 'none' }, flexDirection: 'column', gap: 1.5 }}>
+              {filteredOrders.length === 0 ? (
+                <Paper sx={{ p: 3, textAlign: 'center' }}>
+                  <Typography color="textSecondary">Nenhum pedido encontrado.</Typography>
+                </Paper>
+              ) : (
+                filteredOrders.map((order) => {
+                  const statusInfo = statusLabels[order.status] || { label: order.status, color: 'default' };
+                  return (
+                    <Paper 
+                      key={order.id} 
+                      elevation={2} 
+                      sx={{ p: 2, borderRadius: 2, display: 'flex', flexDirection: 'column', gap: 1 }}
+                      onClick={() => handleOpenDetails(order)}
+                    >
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <Typography sx={{ fontWeight: 'bold', color: 'primary.main', fontSize: '0.95rem' }}>
+                          Mesa {order.tableNumber}
+                        </Typography>
+                        <Chip label={statusInfo.label} color={statusInfo.color} size="small" sx={{ fontWeight: 600, height: 22, fontSize: '0.75rem' }} />
+                      </Box>
+
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: 'text.secondary', fontSize: '0.8rem' }}>
+                        <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                          #{order.id.slice(0, 8).toUpperCase()} {order.customerName ? `• ${order.customerName}` : ''}
+                        </Typography>
+                        <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                          {new Date(order.createdAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })} - {new Date(order.createdAt).toLocaleDateString('pt-BR')}
+                        </Typography>
+                      </Box>
+
+                      <Divider sx={{ my: 0.5 }} />
+
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <Typography sx={{ fontWeight: 'bold', fontSize: '1.05rem', color: 'text.primary' }}>
                           R$ {Number(order.totalAmount || 0).toFixed(2).replace('.', ',')}
-                        </TableCell>
-                        <TableCell align="center">
-                          <IconButton onClick={() => handleOpenDetails(order)} size="small" color="primary">
-                            <VisibilityIcon />
-                          </IconButton>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })
-                )}
-              </TableBody>
-            </Table>
-          )}
-        </TableContainer>
+                        </Typography>
+                        <Button 
+                          size="small" 
+                          variant="outlined" 
+                          endIcon={<VisibilityIcon fontSize="small" />}
+                          onClick={(e) => { e.stopPropagation(); handleOpenDetails(order); }}
+                          sx={{ textTransform: 'none', py: 0.2, px: 1, fontSize: '0.75rem' }}
+                        >
+                          Ver Detalhes
+                        </Button>
+                      </Box>
+                    </Paper>
+                  );
+                })
+              )}
+            </Box>
+
+            {/* Versão Desktop / Tablet: Tabela Clássica com overflow suave */}
+            <TableContainer component={Paper} sx={{ display: { xs: 'none', md: 'block' }, overflowX: 'auto' }}>
+              <Table>
+                <TableHead sx={{ bgcolor: '#f4f6f8' }}>
+                  <TableRow>
+                    <TableCell sx={{ fontWeight: 'bold' }}>PEDIDO</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold' }}>MESA</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold' }}>CLIENTE</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold' }}>STATUS</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold' }}>DATA/HORÁRIO</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold' }}>TOTAL</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold' }} align="center">AÇÕES</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {filteredOrders.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={7} align="center" sx={{ py: 3 }}>
+                        Nenhum pedido encontrado.
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    filteredOrders.map((order) => {
+                      const statusInfo = statusLabels[order.status] || { label: order.status, color: 'default' };
+                      return (
+                        <TableRow key={order.id} hover>
+                          <TableCell>{order.id.slice(0, 8).toUpperCase()}</TableCell>
+                          <TableCell>Mesa {order.tableNumber}</TableCell>
+                          <TableCell>{order.customerName || '-'}</TableCell>
+                          <TableCell>
+                            <Chip label={statusInfo.label} color={statusInfo.color} size="small" />
+                          </TableCell>
+                          <TableCell>{new Date(order.createdAt).toLocaleString('pt-BR')}</TableCell>
+                          <TableCell>
+                            R$ {Number(order.totalAmount || 0).toFixed(2).replace('.', ',')}
+                          </TableCell>
+                          <TableCell align="center">
+                            <IconButton onClick={() => handleOpenDetails(order)} size="small" color="primary">
+                              <VisibilityIcon />
+                            </IconButton>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })
+                  )}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </>
+        )}
       </Box>
 
       {/* Detalhes do Pedido Dialog */}

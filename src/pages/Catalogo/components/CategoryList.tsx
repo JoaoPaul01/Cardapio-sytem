@@ -66,31 +66,58 @@ export function CategoryList({
             expandIcon={<ExpandMoreIcon />}
             sx={{ borderBottom: '1px solid #f0f0f0', display: 'flex', alignItems: 'center' }}
           >
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', pr: 2 }}>
+            <Box 
+              sx={{ 
+                display: 'flex', 
+                flexDirection: { xs: 'column', sm: 'row' },
+                justifyContent: 'space-between', 
+                alignItems: { xs: 'flex-start', sm: 'center' }, 
+                width: '100%', 
+                gap: { xs: 1, sm: 2 },
+                pr: 1
+              }}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'center', width: { xs: '100%', sm: 'auto' } }}>
+                {editingCategoryId === category.id ? (
+                  <TextField 
+                    size="small" 
+                    value={categoryNameInput} 
+                    onChange={(e) => setCategoryNameInput(e.target.value)}
+                    onBlur={() => handleSaveCategoryName(category.id)}
+                    onKeyDown={(e) => handleKeyDown(e, category.id)}
+                    onClick={(e) => e.stopPropagation()}
+                    autoFocus
+                    sx={{ width: { xs: '100%', sm: 'auto' } }}
+                  />
+                ) : (
+                  <Typography 
+                    variant="h6" 
+                    sx={{ 
+                      fontWeight: 'bold', 
+                      color: 'text.primary', 
+                      cursor: 'text',
+                      fontSize: { xs: '1rem', sm: '1.25rem' }
+                    }}
+                    onDoubleClick={(e) => { e.stopPropagation(); handleDoubleClickCategory(category); }}
+                  >
+                    {category.name}
+                  </Typography>
+                )}
+              </Box>
               
-              {editingCategoryId === category.id ? (
-                <TextField 
-                  size="small" 
-                  value={categoryNameInput} 
-                  onChange={(e) => setCategoryNameInput(e.target.value)}
-                  onBlur={() => handleSaveCategoryName(category.id)}
-                  onKeyDown={(e) => handleKeyDown(e, category.id)}
-                  onClick={(e) => e.stopPropagation()}
-                  autoFocus
-                />
-              ) : (
-                <Typography 
-                  variant="h6" 
-                  sx={{ fontWeight: 'bold', color: 'text.primary', cursor: 'text' }}
-                  onDoubleClick={(e) => { e.stopPropagation(); handleDoubleClickCategory(category); }}
-                >
-                  {category.name}
-                </Typography>
-              )}
-              
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }} onClick={(e) => e.stopPropagation()}>
+              <Box 
+                sx={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  flexWrap: 'wrap',
+                  gap: 0.5,
+                  width: { xs: '100%', sm: 'auto' },
+                  justifyContent: { xs: 'space-between', sm: 'flex-end' }
+                }} 
+                onClick={(e) => e.stopPropagation()}
+              >
                 <FormControlLabel
-                  sx={{ mr: 1, my: 0 }}
+                  sx={{ mr: { xs: 0, sm: 1 }, my: 0 }}
                   control={
                     <Switch
                       size="small"
@@ -105,21 +132,24 @@ export function CategoryList({
                     </Typography>
                   }
                 />
-                <IconButton component="div" size="small" color="primary" onClick={() => onEditCategory(category)} title="Editar Categoria">
-                  <EditIcon fontSize="small" />
-                </IconButton>
-                <IconButton component="div" size="small" color="error" onClick={() => onDeleteCategory(category.id)} title="Excluir Categoria">
-                  <DeleteIcon fontSize="small" />
-                </IconButton>
-                <Button 
-                  component="div"
-                  variant="text" 
-                  size="small"
-                  startIcon={<AddCircleOutlinedIcon />}
-                  onClick={() => onAddProduct(category.id)}
-                >
-                  Adicionar
-                </Button>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <IconButton component="div" size="small" color="primary" onClick={() => onEditCategory(category)} title="Editar Categoria">
+                    <EditIcon fontSize="small" />
+                  </IconButton>
+                  <IconButton component="div" size="small" color="error" onClick={() => onDeleteCategory(category.id)} title="Excluir Categoria">
+                    <DeleteIcon fontSize="small" />
+                  </IconButton>
+                  <Button 
+                    component="div"
+                    variant="text" 
+                    size="small"
+                    startIcon={<AddCircleOutlinedIcon />}
+                    onClick={() => onAddProduct(category.id)}
+                    sx={{ ml: 0.5, textTransform: 'none', px: 1, py: 0.5, fontSize: { xs: '0.75rem', sm: '0.8125rem' } }}
+                  >
+                    Adicionar
+                  </Button>
+                </Box>
               </Box>
             </Box>
           </AccordionSummary>

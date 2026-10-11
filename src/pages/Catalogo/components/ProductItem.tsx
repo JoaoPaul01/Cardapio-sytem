@@ -79,108 +79,129 @@ export function ProductItem({ product, onEdit, onDelete, onUpdate }: ProductItem
   };
 
   return (
-    <Card variant="outlined" sx={{ display: 'flex', alignItems: 'center', width: '100%', cursor: 'pointer', '&:hover': { backgroundColor: '#fdfdfd' }, p: 2 }}>
-      
-      {/* Imagem do produto à esquerda */}
+    <Card 
+      variant="outlined" 
+      sx={{ 
+        display: 'flex', 
+        flexDirection: { xs: 'column', sm: 'row' },
+        alignItems: { xs: 'stretch', sm: 'center' }, 
+        width: '100%', 
+        cursor: 'pointer', 
+        '&:hover': { backgroundColor: '#fdfdfd' }, 
+        p: { xs: 1.5, sm: 2 },
+        gap: { xs: 1.5, sm: 2 }
+      }}
+    >
+      <Box sx={{ display: 'flex', alignItems: 'center', flex: 1, minWidth: 0 }}>
+        {/* Imagem do produto à esquerda */}
+        <Box 
+          sx={{ 
+            width: { xs: 64, sm: 80 }, 
+            height: { xs: 64, sm: 80 }, 
+            minWidth: { xs: 64, sm: 80 },
+            backgroundColor: '#e0e0e0',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: '#757575',
+            fontSize: '0.7rem',
+            mr: { xs: 1.5, sm: 2.5 },
+            borderRadius: 2,
+            position: 'relative',
+            overflow: 'hidden',
+            cursor: 'pointer',
+            transition: 'all 0.2s ease',
+            '&:hover': {
+              opacity: 0.85,
+              boxShadow: '0 0 0 2px #1976d2'
+            }
+          }}
+          onClick={handleImageClick}
+          title="Clique para alterar a foto do produto"
+        >
+          {uploadingImage ? (
+            <CircularProgress size={20} />
+          ) : product.imageUrl ? (
+            <img 
+              src={product.imageUrl} 
+              alt={product.name} 
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+              onError={(e) => {
+                (e.currentTarget as HTMLImageElement).src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 24 24" fill="%239e9e9e"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>';
+              }}
+            />
+          ) : (
+            "Sem Foto"
+          )}
+          <input 
+            type="file" 
+            hidden 
+            accept="image/*" 
+            ref={fileInputRef} 
+            onChange={handleFileChange}
+            onClick={(e) => e.stopPropagation()}
+          />
+        </Box>
+
+        {/* Conteúdo Central: Nome e Descrição */}
+        <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 0.5, minWidth: 0, pr: 1 }}>
+          {editingField === 'name' ? (
+            <TextField 
+              size="small" 
+              value={editValue} 
+              onChange={(e) => setEditValue(e.target.value)}
+              onBlur={handleSave}
+              onKeyDown={handleKeyDown}
+              onClick={(e) => e.stopPropagation()}
+              autoFocus
+            />
+          ) : (
+            <Typography 
+              variant="subtitle1" 
+              sx={{ fontWeight: '600', fontSize: { xs: '0.95rem', sm: '1rem' } }}
+              onDoubleClick={(e) => { e.stopPropagation(); handleDoubleClick('name', product.name); }}
+            >
+              {product.name}
+            </Typography>
+          )}
+
+          {editingField === 'description' ? (
+            <TextField 
+              size="small"
+              multiline
+              rows={2}
+              value={editValue} 
+              onChange={(e) => setEditValue(e.target.value)}
+              onBlur={handleSave}
+              onKeyDown={handleKeyDown}
+              onClick={(e) => e.stopPropagation()}
+              autoFocus
+            />
+          ) : (
+            <Typography 
+              variant="body2" 
+              color="textSecondary" 
+              sx={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', minHeight: 18, fontSize: { xs: '0.8rem', sm: '0.875rem' } }}
+              onDoubleClick={(e) => { e.stopPropagation(); handleDoubleClick('description', product.description || ''); }}
+            >
+              {product.description || 'Sem descrição'}
+            </Typography>
+          )}
+        </Box>
+      </Box>
+
+      {/* Conteúdo de Preço, Switch e Ações */}
       <Box 
         sx={{ 
-          width: 80, 
-          height: 80, 
-          minWidth: 80,
-          backgroundColor: '#e0e0e0',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          color: '#757575',
-          fontSize: '0.7rem',
-          mr: 3,
-          borderRadius: 2,
-          position: 'relative',
-          overflow: 'hidden',
-          cursor: 'pointer',
-          transition: 'all 0.2s ease',
-          '&:hover': {
-            opacity: 0.85,
-            boxShadow: '0 0 0 2px #1976d2'
-          }
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: { xs: 1, sm: 1.5 }, 
+          justifyContent: 'space-between',
+          borderTop: { xs: '1px solid #f0f0f0', sm: 'none' },
+          pt: { xs: 1, sm: 0 },
+          flexWrap: 'wrap'
         }}
-        onClick={handleImageClick}
-        title="Clique para alterar a foto do produto"
       >
-        {uploadingImage ? (
-          <CircularProgress size={24} />
-        ) : product.imageUrl ? (
-          <img 
-            src={product.imageUrl} 
-            alt={product.name} 
-            style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-            onError={(e) => {
-              // Imagem padrão caso a URL falhe
-              (e.currentTarget as HTMLImageElement).src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 24 24" fill="%239e9e9e"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>';
-            }}
-          />
-        ) : (
-          "Sem Foto"
-        )}
-        <input 
-          type="file" 
-          hidden 
-          accept="image/*" 
-          ref={fileInputRef} 
-          onChange={handleFileChange}
-          onClick={(e) => e.stopPropagation()}
-        />
-      </Box>
-
-      {/* Conteúdo Central: Nome e Descrição */}
-      <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 0.5, pr: 2 }}>
-        {editingField === 'name' ? (
-          <TextField 
-            size="small" 
-            value={editValue} 
-            onChange={(e) => setEditValue(e.target.value)}
-            onBlur={handleSave}
-            onKeyDown={handleKeyDown}
-            onClick={(e) => e.stopPropagation()}
-            autoFocus
-          />
-        ) : (
-          <Typography 
-            variant="subtitle1" 
-            sx={{ fontWeight: '500' }}
-            onDoubleClick={(e) => { e.stopPropagation(); handleDoubleClick('name', product.name); }}
-          >
-            {product.name}
-          </Typography>
-        )}
-
-        {editingField === 'description' ? (
-          <TextField 
-            size="small"
-            multiline
-            rows={2}
-            value={editValue} 
-            onChange={(e) => setEditValue(e.target.value)}
-            onBlur={handleSave}
-            onKeyDown={handleKeyDown}
-            onClick={(e) => e.stopPropagation()}
-            autoFocus
-          />
-        ) : (
-          <Typography 
-            variant="body2" 
-            color="textSecondary" 
-            sx={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', minHeight: 20 }}
-            onDoubleClick={(e) => { e.stopPropagation(); handleDoubleClick('description', product.description || ''); }}
-          >
-            {product.description || 'Sem descrição'}
-          </Typography>
-        )}
-      </Box>
-
-      {/* Conteúdo à Direita: Preço, Switch e Ações */}
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, justifyContent: 'flex-end', flexWrap: 'nowrap' }}>
-
         {/* Preço */}
         {editingField === 'price' ? (
           <TextField 
@@ -192,7 +213,7 @@ export function ProductItem({ product, onEdit, onDelete, onUpdate }: ProductItem
             onKeyDown={handleKeyDown}
             onClick={(e) => e.stopPropagation()}
             autoFocus
-            sx={{ width: 100 }}
+            sx={{ width: 90 }}
             slotProps={{
               input: { startAdornment: <InputAdornment position="start">R$</InputAdornment> }
             }}
@@ -201,10 +222,10 @@ export function ProductItem({ product, onEdit, onDelete, onUpdate }: ProductItem
           <Typography 
             variant="body1" 
             sx={{ 
-              fontWeight: '500', 
+              fontWeight: '700', 
               color: isProductActive ? 'success.main' : 'text.disabled', 
-              minWidth: 80, 
-              textAlign: 'right' 
+              minWidth: { xs: 'auto', sm: 75 }, 
+              fontSize: { xs: '0.95rem', sm: '1rem' }
             }}
             onDoubleClick={(e) => { e.stopPropagation(); handleDoubleClick('price', product.price?.toString() || ''); }}
           >
@@ -212,34 +233,37 @@ export function ProductItem({ product, onEdit, onDelete, onUpdate }: ProductItem
           </Typography>
         )}
 
-        {/* Switch Ativo / Pausado */}
-        <Box onClick={(e) => e.stopPropagation()} sx={{ display: 'flex', alignItems: 'center' }}>
-          <FormControlLabel
-            sx={{ m: 0 }}
-            control={
-              <Switch
-                size="small"
-                checked={product.isActive !== false}
-                onChange={(e) => onUpdate && onUpdate({ isActive: e.target.checked })}
-                color="primary"
-              />
-            }
-            label={
-              <Typography variant="caption" sx={{ color: product.isActive !== false ? 'success.main' : 'text.disabled', fontWeight: 'bold' }}>
-                {product.isActive !== false ? 'Ativo' : 'Pausado'}
-              </Typography>
-            }
-          />
-        </Box>
-        
-        {/* Botões de Ação */}
-        <Box sx={{ display: 'flex', gap: 0.5 }}>
-          <IconButton size="small" onClick={(e) => { e.stopPropagation(); onEdit(); }} title="Editar Produto">
-            <EditIcon fontSize="small" />
-          </IconButton>
-          <IconButton size="small" color="error" onClick={(e) => { e.stopPropagation(); onDelete(); }} title="Excluir Produto">
-            <DeleteIcon fontSize="small" />
-          </IconButton>
+        {/* Grupo Switch + Botões de Ação */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+          {/* Switch Ativo / Pausado */}
+          <Box onClick={(e) => e.stopPropagation()} sx={{ display: 'flex', alignItems: 'center' }}>
+            <FormControlLabel
+              sx={{ m: 0 }}
+              control={
+                <Switch
+                  size="small"
+                  checked={product.isActive !== false}
+                  onChange={(e) => onUpdate && onUpdate({ isActive: e.target.checked })}
+                  color="primary"
+                />
+              }
+              label={
+                <Typography variant="caption" sx={{ color: product.isActive !== false ? 'success.main' : 'text.disabled', fontWeight: 'bold', fontSize: '0.75rem' }}>
+                  {product.isActive !== false ? 'Ativo' : 'Pausado'}
+                </Typography>
+              }
+            />
+          </Box>
+          
+          {/* Botões de Ação */}
+          <Box sx={{ display: 'flex', gap: 0.2 }}>
+            <IconButton size="small" onClick={(e) => { e.stopPropagation(); onEdit(); }} title="Editar Produto">
+              <EditIcon fontSize="small" />
+            </IconButton>
+            <IconButton size="small" color="error" onClick={(e) => { e.stopPropagation(); onDelete(); }} title="Excluir Produto">
+              <DeleteIcon fontSize="small" />
+            </IconButton>
+          </Box>
         </Box>
       </Box>
 
