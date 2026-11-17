@@ -1,20 +1,4 @@
 .page {
-  --primary: #e4572e;
-  --primary-hover: #c9461f;
-  --secondary: #f2a541;
-  --accent: #7a1e2c;
-  --bg: #140d0b;
-  --surface: #211714;
-  --surface-2: #2b1f1b;
-  --border: #4a3630;
-  --text: #f5ede6;
-  --text-muted: #c9b8ad;
-  --success: #6fcf97;
-  --error: #ff8a7a;
-  --error-bg: rgba(255, 138, 122, 0.12);
-  --font-heading: 'Oswald', 'Arial Narrow', sans-serif;
-  --font-body: 'Inter', system-ui, sans-serif;
-
   position: relative;
   min-height: 100dvh;
   width: 100%;
@@ -81,6 +65,7 @@
 .title {
   margin: 16px 0 4px;
   font-family: var(--font-heading);
+  line-height: 0.9;
   font-size: 34px;
   font-weight: 600;
   letter-spacing: 0.5px;

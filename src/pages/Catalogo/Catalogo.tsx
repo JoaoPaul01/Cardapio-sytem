@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from 'react';
-import { Box } from '@mui/material';
+import { useEffect, useState } from 'react';
 import { useAppContext } from '../../context/appContext';
 import { locations } from '../../services/locations';
 import { CatalogHeader } from './components/CatalogHeader';
 import { CategoryList } from './components/CategoryList';
 import { CategoryModal } from './components/CategoryModal';
 import { ProductModal } from './components/ProductModal';
+import styles from './Catalogo.module.css';
 
 export default function Catalogo() {
   const { getData, removeData, patchData } = useAppContext();
@@ -21,7 +21,6 @@ export default function Catalogo() {
   const [categoryToEdit, setCategoryToEdit] = useState<any>(null);
   const [productToEdit, setProductToEdit] = useState<any>(null);
 
-  // Função para ordenar itens: mais novos sempre no topo (createdAt desc) e ordem estável
   const sortCatalogItems = (data: any[]) => {
     if (!Array.isArray(data)) return [];
 
@@ -123,7 +122,6 @@ export default function Catalogo() {
     }
   };
 
-  // Lógica do filtro para nome do produto ou nome da categoria
   const filteredCategories = categories.map(cat => {
     const products = cat.products || [];
     const filteredProducts = products.filter((p: any) => 
@@ -137,7 +135,7 @@ export default function Catalogo() {
   );
 
   return (
-    <Box>
+    <section className={styles.page} aria-labelledby="catalogo-title">
       <CatalogHeader 
         filterText={filterText} 
         onFilterChange={setFilterText} 
@@ -171,6 +169,6 @@ export default function Catalogo() {
           initialData={productToEdit}
         />
       )}
-    </Box>
+    </section>
   );
 }

@@ -1,20 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { 
-  Dialog, 
-  DialogTitle, 
-  DialogContent, 
-  DialogActions, 
-  TextField, 
-  Button, 
-  CircularProgress,
-  Box,
-  Typography,
-  FormControlLabel,
-  Switch
-} from '@mui/material';
+import { Dialog, Switch } from '@mui/material';
 import PhotoCamera from '@mui/icons-material/PhotoCamera';
 import { useAppContext } from '../../../context/appContext';
 import { locations } from '../../../services/locations';
+import styles from '../Catalogo.module.css';
 
 interface ProductModalProps {
   open: boolean;
@@ -26,14 +15,14 @@ interface ProductModalProps {
 
 export function ProductModal({ open, categoryId, onClose, onSuccess, initialData }: ProductModalProps) {
   const { postData, patchData, uploadImageData } = useAppContext();
-  
+
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
   const [isActive, setIsActive] = useState(true);
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
-  
+
   const [loading, setLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -43,8 +32,7 @@ export function ProductModal({ open, categoryId, onClose, onSuccess, initialData
       setDescription(initialData.description || '');
       setPrice(initialData.price?.toString() || '');
       setIsActive(initialData.isActive !== false);
-      // Set preview for existing image if any
-      setPreview(initialData.imageUrl || null); 
+      setPreview(initialData.imageUrl || null);
     } else {
       setName('');
       setDescription('');
@@ -65,17 +53,14 @@ export function ProductModal({ open, categoryId, onClose, onSuccess, initialData
 
   const handleSave = async () => {
     if (!name.trim() || !price) return;
-    
+
     setLoading(true);
     try {
       let uploadedImageUrl = initialData?.imageUrl || '';
       let uploadedImagePath = initialData?.imagePath || undefined;
 
-      // Se houver arquivo selecionado, faz o upload primeiro
       if (file) {
-        // O upload envia o arquivo para a API via POST. Ao retornar os dados do Storage, salva no backend
         const uploadResponse = await uploadImageData('upload', file);
-        
         uploadedImageUrl = uploadResponse?.imageUrl || uploadResponse?.url || uploadResponse?.image || uploadResponse?.filename || uploadResponse;
         uploadedImagePath = uploadResponse?.imagePath;
       }
@@ -101,7 +86,7 @@ export function ProductModal({ open, categoryId, onClose, onSuccess, initialData
       } else {
         await postData(locations.products, payload);
       }
-      
+
       handleCancel();
       onSuccess();
     } catch (error) {
@@ -123,104 +108,116 @@ export function ProductModal({ open, categoryId, onClose, onSuccess, initialData
   };
 
   return (
-    <Dialog open={open} onClose={handleCancel} fullWidth maxWidth="sm">
-      <DialogTitle>{initialData ? 'Editar Produto' : 'Novo Produto'}</DialogTitle>
-      <DialogContent>
-        <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', gap: 3 }}>
-          
-          {/* Upload de Imagem Visual */}
-          <Box 
-            sx={{ 
-              border: '2px dashed #ccc', 
-              borderRadius: 2, 
-              p: 3, 
-              textAlign: 'center',
-              cursor: 'pointer',
-              position: 'relative',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              minHeight: 150,
-              backgroundColor: '#f9f9f9'
-            }}
-            onClick={() => fileInputRef.current?.click()}
-          >
-            {preview ? (
-              <img src={preview} alt="Preview" style={{ maxWidth: '100%', maxHeight: '200px', borderRadius: '8px' }} />
-            ) : (
-              <>
-                <PhotoCamera sx={{ fontSize: 40, color: 'text.secondary', mb: 1 }} />
-                <Typography color="textSecondary">Clique para fazer upload da foto</Typography>
-              </>
-            )}
-            <input 
-              type="file" 
-              hidden 
-              accept="image/*" 
-              ref={fileInputRef} 
-              onChange={handleFileChange}
-            />
-          </Box>
+    <Dialog
+      open={open}
+      onClose={handleCancel}
+      fullWidth
+      maxWidth="sm"
+      slotProps={{ paper: { className: styles.dialogPaper } }}
+    >
+      <h2 className={styles.dialogTitle}>
+        {initialData ? 'Editar Produto' : 'Novo Produto'}
+      </h2>
 
-          <TextField
-            label="Nome do Produto"
-            fullWidth
-            variant="outlined"
+      <div className={styles.dialogBody}>
+        <div
+          className={styles.uploadDropzone}
+          onClick={() => fileInputRef.current?.click()}
+        >
+          {preview ? (
+            <img src={preview} alt="Preview do produto" className={styles.previewImg} />
+          ) : (
+            <>
+              <PhotoCamera fontSize="large" aria-hidden="true" />
+              <span>Clique para fazer upload da foto</span>
+            </>
+          )}
+          <input
+            type="file"
+            hidden
+            accept="image/*"
+            ref={fileInputRef}
+            onChange={handleFileChange}
+          />
+        </div>
+
+        <div className={styles.field}>
+          <label htmlFor="product-name" className={styles.label}>
+            Nome do Produto
+          </label>
+          <input
+            id="product-name"
+            className={styles.input}
             value={name}
             onChange={(e) => setName(e.target.value)}
             disabled={loading}
           />
-          
-          <TextField
-            label="Descrição"
-            fullWidth
-            multiline
+        </div>
+
+        <div className={styles.field}>
+          <label htmlFor="product-desc" className={styles.label}>
+            Descrição
+          </label>
+          <textarea
+            id="product-desc"
+            className={styles.textarea}
             rows={3}
-            variant="outlined"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             disabled={loading}
           />
+        </div>
 
-          <TextField
-            label="Preço (R$)"
-            fullWidth
+        <div className={styles.field}>
+          <label htmlFor="product-price" className={styles.label}>
+            Preço (R$)
+          </label>
+          <input
+            id="product-price"
             type="number"
-            variant="outlined"
+            step="0.01"
+            min="0"
+            className={styles.input}
             value={price}
             onChange={(e) => setPrice(e.target.value)}
             disabled={loading}
-            slotProps={{ htmlInput: { step: "0.01", min: "0" } }}
           />
+        </div>
 
-          <FormControlLabel
-            control={
-              <Switch
-                checked={isActive}
-                onChange={(e) => setIsActive(e.target.checked)}
-                color="primary"
-                disabled={loading}
-              />
-            }
-            label={isActive ? "Produto Ativo (disponível para pedidos)" : "Produto Pausado (indisponível)"}
+        <label className={styles.switchLabel}>
+          <Switch
+            checked={isActive}
+            onChange={(e) => setIsActive(e.target.checked)}
+            color="warning"
+            disabled={loading}
           />
+          <span className={isActive ? styles.activeText : styles.pausedText}>
+            {isActive
+              ? 'Produto Ativo (disponível para pedidos)'
+              : 'Produto Pausado (indisponível)'}
+          </span>
+        </label>
+      </div>
 
-        </Box>
-      </DialogContent>
-      <DialogActions sx={{ px: 3, pb: 3 }}>
-        <Button onClick={handleCancel} color="inherit" disabled={loading}>
-          Cancelar
-        </Button>
-        <Button 
-          onClick={handleSave} 
-          variant="contained" 
-          disabled={loading || !name.trim() || !price}
-          startIcon={loading ? <CircularProgress size={20} /> : null}
+      <div className={styles.dialogActions}>
+        <button
+          type="button"
+          className={styles.ghostBtn}
+          onClick={handleCancel}
+          disabled={loading}
         >
+          Cancelar
+        </button>
+        <button
+          type="button"
+          className={styles.primaryBtn}
+          onClick={handleSave}
+          disabled={loading || !name.trim() || !price}
+        >
+          {loading ? <span className={styles.spinner} aria-hidden="true" /> : null}
           Salvar
-        </Button>
-      </DialogActions>
+        </button>
+      </div>
     </Dialog>
   );
 }

@@ -1,0 +1,428 @@
+.page {
+  width: 100%;
+  color: var(--text);
+  font-family: var(--font-body);
+}
+
+.header {
+  margin-bottom: 24px;
+}
+
+.title {
+  margin: 0 0 4px;
+  font-family: var(--font-heading);
+  font-size: 32px;
+  font-weight: 600;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--text);
+}
+
+.subtitle {
+  margin: 0 0 18px;
+  font-size: 15px;
+  color: var(--text-muted);
+}
+
+.toolbar {
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  margin-bottom: 24px;
+}
+
+.searchBox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 0 14px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text-muted);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.searchBox:focus-within {
+  border-color: var(--secondary);
+  box-shadow: 0 0 0 3px rgba(242, 165, 65, 0.25);
+}
+
+.searchInput {
+  flex: 1;
+  min-width: 0;
+  height: 46px;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 16px;
+  outline: none;
+}
+
+.searchInput::placeholder {
+  color: #8f7a6f;
+}
+
+.errorAlert {
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  border-radius: 12px;
+  border: 1px solid var(--error);
+  background: var(--error-bg);
+  color: var(--error);
+  font-size: 15px;
+}
+
+.stateBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 56px 20px;
+  border-radius: 16px;
+  border: 1px dashed var(--border);
+  background: var(--surface);
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid rgba(242, 165, 65, 0.25);
+  border-top-color: var(--secondary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Mobile list */
+.mobileList {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.mobileCard {
+  padding: 16px;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.mobileCard:hover {
+  border-color: var(--secondary);
+}
+
+.mobileRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.mobileTable {
+  font-family: var(--font-heading);
+  font-size: 18px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--secondary);
+}
+
+.mobileMeta {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.mobileDivider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 4px 0;
+}
+
+.mobileTotal {
+  font-family: var(--font-heading);
+  font-size: 19px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.detailsBtn {
+  min-height: 40px;
+  padding: 0 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface-2);
+  color: var(--secondary);
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Desktop Table */
+.tableContainer {
+  display: none;
+  border-radius: 16px !important;
+  border: 1px solid var(--border);
+  background: var(--surface) !important;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35) !important;
+  overflow-x: auto;
+}
+
+.tableHead {
+  background: var(--surface-2);
+}
+
+.th {
+  color: var(--secondary) !important;
+  font-family: var(--font-heading) !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.8px !important;
+  border-bottom: 1px solid var(--border) !important;
+}
+
+.tr:hover {
+  background: rgba(255, 255, 255, 0.03) !important;
+}
+
+.td {
+  color: var(--text) !important;
+  font-family: var(--font-body) !important;
+  font-size: 15px !important;
+  border-bottom: 1px solid var(--border) !important;
+}
+
+.tdCode {
+  font-family: var(--mono) !important;
+  color: var(--text-muted) !important;
+}
+
+.tdPrice {
+  font-family: var(--font-heading) !important;
+  font-size: 17px !important;
+  font-weight: 600 !important;
+  color: var(--secondary) !important;
+}
+
+/* Status Badges */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+}
+
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+
+.status_OPEN,
+.status_BILL_REQUESTED {
+  background: var(--warning-bg);
+  border: 1px solid rgba(242, 165, 65, 0.5);
+  color: var(--secondary);
+}
+.status_OPEN .dot,
+.status_BILL_REQUESTED .dot { background: var(--secondary); }
+
+.status_PAID,
+.status_CLOSED {
+  background: rgba(111, 207, 151, 0.14);
+  border: 1px solid rgba(111, 207, 151, 0.45);
+  color: var(--success);
+}
+.status_PAID .dot,
+.status_CLOSED .dot { background: var(--success); }
+
+.status_CANCELED {
+  background: var(--error-bg);
+  border: 1px solid var(--error);
+  color: var(--error);
+}
+.status_CANCELED .dot { background: var(--error); }
+
+.viewIconBtn {
+  width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface-2);
+  color: var(--secondary);
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.viewIconBtn:hover {
+  border-color: var(--secondary);
+  background: rgba(242, 165, 65, 0.14);
+}
+
+/* Dialog */
+.dialogPaper {
+  background: var(--surface) !important;
+  color: var(--text) !important;
+  border: 1px solid var(--border);
+  border-radius: 18px !important;
+  padding: 8px;
+}
+
+.dialogTitle {
+  margin: 0;
+  padding: 16px 20px 12px;
+  font-family: var(--font-heading);
+  font-size: 24px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--text);
+  border-bottom: 1px solid var(--border);
+}
+
+.dialogBody {
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.metaGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+
+.metaItem {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.metaLabel {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.metaValue {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.itemsHeading {
+  margin: 4px 0 0;
+  font-family: var(--font-heading);
+  font-size: 18px;
+  text-transform: uppercase;
+  color: var(--secondary);
+}
+
+.itemsList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.orderItemCard {
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+}
+
+.orderItemRow {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.orderItemNotes {
+  margin-top: 4px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.dialogActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 12px 20px 16px;
+  border-top: 1px solid var(--border);
+}
+
+.ghostBtn {
+  min-height: 48px;
+  padding: 0 18px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: transparent;
+  color: var(--text-muted);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.ghostBtn:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.pixBtn {
+  min-height: 48px;
+  padding: 0 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  color: #fff;
+  font-family: var(--font-heading);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.detailsBtn:focus-visible,
+.viewIconBtn:focus-visible,
+.ghostBtn:focus-visible,
+.pixBtn:focus-visible {
+  outline: 3px solid var(--secondary);
+  outline-offset: 2px;
+}
+
+@media (min-width: 600px) {
+  .title { font-size: 36px; }
+}
+
+@media (min-width: 900px) {
+  .mobileList { display: none; }
+  .tableContainer { display: block; }
+}

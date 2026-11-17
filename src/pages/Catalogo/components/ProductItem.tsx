@@ -1,9 +1,9 @@
 import React, { useState, useRef } from 'react';
-import { Card, Typography, Box, IconButton, TextField, InputAdornment, CircularProgress, Switch, FormControlLabel } from '@mui/material';
+import { Switch } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import { useAppContext } from '../../../context/appContext';
-import { locations } from '../../../services/locations';
+import styles from '../Catalogo.module.css';
 
 interface ProductItemProps {
   product: any;
@@ -14,13 +14,13 @@ interface ProductItemProps {
 
 export function ProductItem({ product, onEdit, onDelete, onUpdate }: ProductItemProps) {
   const { uploadImageData } = useAppContext();
-  
+
   const [editingField, setEditingField] = useState<'name' | 'description' | 'price' | null>(null);
   const [editValue, setEditValue] = useState('');
   const [uploadingImage, setUploadingImage] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const formattedPrice = typeof product.price === 'number' 
+  const formattedPrice = typeof product.price === 'number'
     ? `R$ ${product.price.toFixed(2).replace('.', ',')}`
     : `R$ ${parseFloat(product.price || '0').toFixed(2).replace('.', ',')}`;
 
@@ -63,7 +63,7 @@ export function ProductItem({ product, onEdit, onDelete, onUpdate }: ProductItem
         const uploadResponse = await uploadImageData('upload', file);
         const uploadedImageUrl = uploadResponse?.imageUrl || uploadResponse?.url || uploadResponse?.image || uploadResponse?.filename || uploadResponse;
         const uploadedImagePath = uploadResponse?.imagePath;
-        
+
         if (uploadedImageUrl) {
           onUpdate({ imageUrl: uploadedImageUrl, ...(uploadedImagePath ? { imagePath: uploadedImagePath } : {}) });
         }
@@ -79,76 +79,43 @@ export function ProductItem({ product, onEdit, onDelete, onUpdate }: ProductItem
   };
 
   return (
-    <Card 
-      variant="outlined" 
-      sx={{ 
-        display: 'flex', 
-        flexDirection: { xs: 'column', sm: 'row' },
-        alignItems: { xs: 'stretch', sm: 'center' }, 
-        width: '100%', 
-        cursor: 'pointer', 
-        '&:hover': { backgroundColor: '#fdfdfd' }, 
-        p: { xs: 1.5, sm: 2 },
-        gap: { xs: 1.5, sm: 2 }
-      }}
-    >
-      <Box sx={{ display: 'flex', alignItems: 'center', flex: 1, minWidth: 0 }}>
-        {/* Imagem do produto à esquerda */}
-        <Box 
-          sx={{ 
-            width: { xs: 64, sm: 80 }, 
-            height: { xs: 64, sm: 80 }, 
-            minWidth: { xs: 64, sm: 80 },
-            backgroundColor: '#e0e0e0',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: '#757575',
-            fontSize: '0.7rem',
-            mr: { xs: 1.5, sm: 2.5 },
-            borderRadius: 2,
-            position: 'relative',
-            overflow: 'hidden',
-            cursor: 'pointer',
-            transition: 'all 0.2s ease',
-            '&:hover': {
-              opacity: 0.85,
-              boxShadow: '0 0 0 2px #1976d2'
-            }
-          }}
+    <article className={styles.productCard}>
+      <div className={styles.productMain}>
+        <div
+          className={styles.productThumb}
           onClick={handleImageClick}
           title="Clique para alterar a foto do produto"
         >
           {uploadingImage ? (
-            <CircularProgress size={20} />
+            <span className={styles.spinner} aria-hidden="true" />
           ) : product.imageUrl ? (
-            <img 
-              src={product.imageUrl} 
-              alt={product.name} 
-              style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+            <img
+              src={product.imageUrl}
+              alt={product.name}
+              className={styles.productImg}
               onError={(e) => {
-                (e.currentTarget as HTMLImageElement).src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 24 24" fill="%239e9e9e"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>';
+                (e.currentTarget as HTMLImageElement).src =
+                  'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 24 24" fill="%239e9e9e"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>';
               }}
             />
           ) : (
-            "Sem Foto"
+            <span>Sem Foto</span>
           )}
-          <input 
-            type="file" 
-            hidden 
-            accept="image/*" 
-            ref={fileInputRef} 
+          <input
+            type="file"
+            hidden
+            accept="image/*"
+            ref={fileInputRef}
             onChange={handleFileChange}
             onClick={(e) => e.stopPropagation()}
           />
-        </Box>
+        </div>
 
-        {/* Conteúdo Central: Nome e Descrição */}
-        <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 0.5, minWidth: 0, pr: 1 }}>
+        <div className={styles.productInfo}>
           {editingField === 'name' ? (
-            <TextField 
-              size="small" 
-              value={editValue} 
+            <input
+              className={styles.inlineInput}
+              value={editValue}
               onChange={(e) => setEditValue(e.target.value)}
               onBlur={handleSave}
               onKeyDown={handleKeyDown}
@@ -156,21 +123,22 @@ export function ProductItem({ product, onEdit, onDelete, onUpdate }: ProductItem
               autoFocus
             />
           ) : (
-            <Typography 
-              variant="subtitle1" 
-              sx={{ fontWeight: '600', fontSize: { xs: '0.95rem', sm: '1rem' } }}
-              onDoubleClick={(e) => { e.stopPropagation(); handleDoubleClick('name', product.name); }}
+            <h3
+              className={styles.productName}
+              onDoubleClick={(e) => {
+                e.stopPropagation();
+                handleDoubleClick('name', product.name);
+              }}
             >
               {product.name}
-            </Typography>
+            </h3>
           )}
 
           {editingField === 'description' ? (
-            <TextField 
-              size="small"
-              multiline
+            <textarea
+              className={styles.inlineInput}
               rows={2}
-              value={editValue} 
+              value={editValue}
               onChange={(e) => setEditValue(e.target.value)}
               onBlur={handleSave}
               onKeyDown={handleKeyDown}
@@ -178,95 +146,81 @@ export function ProductItem({ product, onEdit, onDelete, onUpdate }: ProductItem
               autoFocus
             />
           ) : (
-            <Typography 
-              variant="body2" 
-              color="textSecondary" 
-              sx={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', minHeight: 18, fontSize: { xs: '0.8rem', sm: '0.875rem' } }}
-              onDoubleClick={(e) => { e.stopPropagation(); handleDoubleClick('description', product.description || ''); }}
+            <p
+              className={styles.productDesc}
+              onDoubleClick={(e) => {
+                e.stopPropagation();
+                handleDoubleClick('description', product.description || '');
+              }}
             >
               {product.description || 'Sem descrição'}
-            </Typography>
+            </p>
           )}
-        </Box>
-      </Box>
+        </div>
+      </div>
 
-      {/* Conteúdo de Preço, Switch e Ações */}
-      <Box 
-        sx={{ 
-          display: 'flex', 
-          alignItems: 'center', 
-          gap: { xs: 1, sm: 1.5 }, 
-          justifyContent: 'space-between',
-          borderTop: { xs: '1px solid #f0f0f0', sm: 'none' },
-          pt: { xs: 1, sm: 0 },
-          flexWrap: 'wrap'
-        }}
-      >
-        {/* Preço */}
+      <div className={styles.productMeta}>
         {editingField === 'price' ? (
-          <TextField 
-            size="small" 
-            variant="outlined"
-            value={editValue} 
+          <input
+            className={styles.inlinePriceInput}
+            value={editValue}
             onChange={(e) => setEditValue(e.target.value)}
             onBlur={handleSave}
             onKeyDown={handleKeyDown}
             onClick={(e) => e.stopPropagation()}
             autoFocus
-            sx={{ width: 90 }}
-            slotProps={{
-              input: { startAdornment: <InputAdornment position="start">R$</InputAdornment> }
-            }}
           />
         ) : (
-          <Typography 
-            variant="body1" 
-            sx={{ 
-              fontWeight: '700', 
-              color: isProductActive ? 'success.main' : 'text.disabled', 
-              minWidth: { xs: 'auto', sm: 75 }, 
-              fontSize: { xs: '0.95rem', sm: '1rem' }
+          <span
+            className={`${styles.productPrice} ${!isProductActive ? styles.productPricePaused : ''}`}
+            onDoubleClick={(e) => {
+              e.stopPropagation();
+              handleDoubleClick('price', product.price?.toString() || '');
             }}
-            onDoubleClick={(e) => { e.stopPropagation(); handleDoubleClick('price', product.price?.toString() || ''); }}
           >
             {formattedPrice}
-          </Typography>
+          </span>
         )}
 
-        {/* Grupo Switch + Botões de Ação */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-          {/* Switch Ativo / Pausado */}
-          <Box onClick={(e) => e.stopPropagation()} sx={{ display: 'flex', alignItems: 'center' }}>
-            <FormControlLabel
-              sx={{ m: 0 }}
-              control={
-                <Switch
-                  size="small"
-                  checked={product.isActive !== false}
-                  onChange={(e) => onUpdate && onUpdate({ isActive: e.target.checked })}
-                  color="primary"
-                />
-              }
-              label={
-                <Typography variant="caption" sx={{ color: product.isActive !== false ? 'success.main' : 'text.disabled', fontWeight: 'bold', fontSize: '0.75rem' }}>
-                  {product.isActive !== false ? 'Ativo' : 'Pausado'}
-                </Typography>
-              }
+        <div className={styles.actionGroup}>
+          <label className={styles.switchLabel} onClick={(e) => e.stopPropagation()}>
+            <Switch
+              size="small"
+              checked={isProductActive}
+              onChange={(e) => onUpdate && onUpdate({ isActive: e.target.checked })}
+              color="warning"
             />
-          </Box>
-          
-          {/* Botões de Ação */}
-          <Box sx={{ display: 'flex', gap: 0.2 }}>
-            <IconButton size="small" onClick={(e) => { e.stopPropagation(); onEdit(); }} title="Editar Produto">
-              <EditIcon fontSize="small" />
-            </IconButton>
-            <IconButton size="small" color="error" onClick={(e) => { e.stopPropagation(); onDelete(); }} title="Excluir Produto">
-              <DeleteIcon fontSize="small" />
-            </IconButton>
-          </Box>
-        </Box>
-      </Box>
+            <span className={isProductActive ? styles.activeText : styles.pausedText}>
+              {isProductActive ? 'Ativo' : 'Pausado'}
+            </span>
+          </label>
 
-    </Card>
+          <button
+            type="button"
+            className={styles.iconBtn}
+            onClick={(e) => {
+              e.stopPropagation();
+              onEdit();
+            }}
+            title="Editar Produto"
+            aria-label={`Editar produto ${product.name}`}
+          >
+            <EditIcon fontSize="small" />
+          </button>
+          <button
+            type="button"
+            className={`${styles.iconBtn} ${styles.iconBtnDanger}`}
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete();
+            }}
+            title="Excluir Produto"
+            aria-label={`Excluir produto ${product.name}`}
+          >
+            <DeleteIcon fontSize="small" />
+          </button>
+        </div>
+      </div>
+    </article>
   );
 }

@@ -1,18 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  Dialog, 
-  DialogTitle, 
-  DialogContent, 
-  DialogActions, 
-  TextField, 
-  Button, 
-  CircularProgress,
-  FormControlLabel,
-  Switch,
-  Box
-} from '@mui/material';
+import { useState, useEffect } from 'react';
+import { Dialog, Switch } from '@mui/material';
 import { useAppContext } from '../../../context/appContext';
 import { locations } from '../../../services/locations';
+import styles from '../Catalogo.module.css';
 
 interface CategoryModalProps {
   open: boolean;
@@ -39,7 +29,7 @@ export function CategoryModal({ open, onClose, onSuccess, initialData }: Categor
 
   const handleSave = async () => {
     if (!name.trim()) return;
-    
+
     setLoading(true);
     try {
       const payload = { name: name.trim(), isActive };
@@ -66,47 +56,66 @@ export function CategoryModal({ open, onClose, onSuccess, initialData }: Categor
   };
 
   return (
-    <Dialog open={open} onClose={handleCancel} fullWidth maxWidth="sm">
-      <DialogTitle sx={{ color: 'black' }}>{initialData ? 'Editar Categoria' : 'Nova Categoria'}</DialogTitle>
-      <DialogContent>
-        <Box sx={{ mt: 1, display: 'flex', flexDirection: 'column', gap: 2 }}>
-          <TextField
+    <Dialog
+      open={open}
+      onClose={handleCancel}
+      fullWidth
+      maxWidth="sm"
+      slotProps={{ paper: { className: styles.dialogPaper } }}
+    >
+      <h2 className={styles.dialogTitle}>
+        {initialData ? 'Editar Categoria' : 'Nova Categoria'}
+      </h2>
+
+      <div className={styles.dialogBody}>
+        <div className={styles.field}>
+          <label htmlFor="category-name" className={styles.label}>
+            Nome da Categoria
+          </label>
+          <input
+            id="category-name"
+            className={styles.input}
             autoFocus
-            margin="dense"
-            label="Nome da Categoria"
-            fullWidth
-            variant="outlined"
             value={name}
             onChange={(e) => setName(e.target.value)}
             disabled={loading}
           />
+        </div>
 
-          <FormControlLabel
-            control={
-              <Switch
-                checked={isActive}
-                onChange={(e) => setIsActive(e.target.checked)}
-                color="primary"
-                disabled={loading}
-              />
-            }
-            label={isActive ? "Categoria Ativa (visível no cardápio)" : "Categoria Pausada (oculta para clientes)"}
+        <label className={styles.switchLabel}>
+          <Switch
+            checked={isActive}
+            onChange={(e) => setIsActive(e.target.checked)}
+            color="warning"
+            disabled={loading}
           />
-        </Box>
-      </DialogContent>
-      <DialogActions sx={{ px: 3, pb: 3 }}>
-        <Button onClick={handleCancel} color="inherit" disabled={loading}>
-          Cancelar
-        </Button>
-        <Button 
-          onClick={handleSave} 
-          variant="contained" 
-          disabled={loading || !name.trim()}
-          startIcon={loading ? <CircularProgress size={20} /> : null}
+          <span className={isActive ? styles.activeText : styles.pausedText}>
+            {isActive
+              ? 'Categoria Ativa (visível no cardápio)'
+              : 'Categoria Pausada (oculta para clientes)'}
+          </span>
+        </label>
+      </div>
+
+      <div className={styles.dialogActions}>
+        <button
+          type="button"
+          className={styles.ghostBtn}
+          onClick={handleCancel}
+          disabled={loading}
         >
+          Cancelar
+        </button>
+        <button
+          type="button"
+          className={styles.primaryBtn}
+          onClick={handleSave}
+          disabled={loading || !name.trim()}
+        >
+          {loading ? <span className={styles.spinner} aria-hidden="true" /> : null}
           Salvar
-        </Button>
-      </DialogActions>
+        </button>
+      </div>
     </Dialog>
   );
 }

@@ -1,15 +1,12 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import {
-  Typography, Paper, Box, Button, Grid, Card, CardActionArea, Dialog, DialogTitle,
-  DialogContent, TextField, DialogActions, CircularProgress, Alert, Chip, IconButton,
-  DialogContentText
-} from '@mui/material';
+import { useCallback, useEffect, useState } from 'react';
+import { Dialog } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import TableBarIcon from '@mui/icons-material/TableBar';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { useNavigate } from 'react-router-dom';
 import { useAppContext } from '../../context/appContext';
 import { locations } from '../../services/locations';
+import styles from './Mesas.module.css';
 
 interface Mesa {
   id: string;
@@ -79,7 +76,6 @@ export default function Mesas() {
     setSaving(true);
     setSaveError('');
     try {
-      // O backend exige "tableNumber" numérico (POST /tables)
       await postData(locations.tables, { tableNumber });
       handleCloseDialog();
       fetchMesas();
@@ -108,110 +104,185 @@ export default function Mesas() {
   };
 
   return (
-    <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: { xs: 2, sm: 3 }, color: "black", flexWrap: 'wrap', gap: 1 }}>
-        <Typography variant="h4" sx={{ fontWeight: 'bold', fontSize: { xs: '1.6rem', sm: '2.125rem' } }}>
-          Mesas
-        </Typography>
-        <Button variant="contained" size="small" startIcon={<AddIcon />} onClick={() => setOpenDialog(true)} sx={{ textTransform: 'none', fontWeight: 600 }}>
+    <section className={styles.page} aria-labelledby="mesas-title">
+      <header className={styles.header}>
+        <div className={styles.headerInfo}>
+          <h1 id="mesas-title" className={styles.title}>Mesas</h1>
+          <p className={styles.subtitle}>Gerencie o salão e acompanhe as comandas ativas</p>
+        </div>
+        <button type="button" className={styles.primaryBtn} onClick={() => setOpenDialog(true)}>
+          <AddIcon fontSize="small" aria-hidden="true" />
           Criar mesa
-        </Button>
-      </Box>
+        </button>
+      </header>
 
       {loadError && (
-        <Alert severity="error" sx={{ mb: 2 }} action={<Button color="inherit" onClick={fetchMesas}>Tentar novamente</Button>}>
-          {loadError}
-        </Alert>
+        <div className={styles.errorAlert} role="alert">
+          <span>{loadError}</span>
+          <button type="button" className={styles.retryBtn} onClick={fetchMesas}>
+            Tentar novamente
+          </button>
+        </div>
       )}
 
       {loading ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}>
-          <CircularProgress />
-        </Box>
+        <div className={styles.stateBox} role="status" aria-live="polite">
+          <div className={styles.spinner} aria-hidden="true" />
+          <span>Carregando mesas...</span>
+        </div>
+      ) : mesas.length === 0 && !loadError ? (
+        <div className={styles.stateBox}>
+          <p>Nenhuma mesa criada ainda.</p>
+        </div>
       ) : (
-        <Grid container spacing={{ xs: 1.5, sm: 2.5, md: 3 }}>
+        <div className={styles.grid}>
           {mesas.map((mesa) => {
             const status = statusLabel[mesa.status] || { label: mesa.status, color: 'default' as const };
+            const statusClass = styles[`status_${mesa.status}`] || styles.status_AVAILABLE;
             return (
-              <Grid size={{ xs: 6, sm: 6, md: 4, lg: 3 }} key={mesa.id}>
-                <Card elevation={2} sx={{ borderRadius: 2, position: 'relative' }}>
-                  <IconButton 
-                    onClick={(e) => { e.stopPropagation(); setMesaToDelete(mesa); }} 
-                    sx={{ position: 'absolute', top: 4, right: 4, zIndex: 1, p: 0.5 }}
-                    color="error"
-                    size="small"
-                  >
-                    <DeleteIcon sx={{ fontSize: { xs: 18, sm: 20 } }} />
-                  </IconButton>
-                  <CardActionArea
-                    onClick={() => navigate(`/mesa/${mesa.id}`)}
-                    sx={{ p: { xs: 1.5, sm: 2.5 }, display: 'flex', flexDirection: 'column', alignItems: 'center' }}
-                  >
-                    <TableBarIcon sx={{ fontSize: { xs: 38, sm: 54 }, color: 'primary.main', mb: 0.5 }} />
-                    <Typography sx={{ fontWeight: 'bold', fontSize: { xs: '0.95rem', sm: '1.25rem' } }}>
-                      Mesa {mesa.tableNumber}
-                    </Typography>
-                    <Chip size="small" label={status.label} color={status.color} sx={{ mt: 0.8, height: { xs: 20, sm: 24 }, fontSize: { xs: '0.7rem', sm: '0.8125rem' } }} />
-                    {mesa.activeOrder && (
-                      <Typography variant="caption" color="textSecondary" sx={{ mt: 0.8, textAlign: 'center', fontWeight: 500 }}>
-                        {mesa.activeOrder.itemsCount} {mesa.activeOrder.itemsCount === 1 ? 'item' : 'itens'} • R$ {mesa.activeOrder.totalAmount}
-                      </Typography>
+              <article key={mesa.id} className={styles.card}>
+                <button
+                  type="button"
+                  className={styles.deleteIconBtn}
+                  aria-label={`Excluir Mesa ${mesa.tableNumber}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setMesaToDelete(mesa);
+                  }}
+                >
+                  <DeleteIcon fontSize="small" aria-hidden="true" />
+                </button>
+
+                <button
+                  type="button"
+                  className={styles.cardAction}
+                  onClick={() => navigate(`/mesa/${mesa.id}`)}
+                >
+                  <div className={styles.cardTop}>
+                    <span className={styles.iconBadge} aria-hidden="true">
+                      <TableBarIcon className={styles.tableIcon} />
+                    </span>
+                    <div className={styles.cardTitleWrap}>
+                      <span className={styles.tableName}>Mesa {mesa.tableNumber}</span>
+                      <span className={`${styles.badge} ${statusClass}`}>
+                        <span className={styles.dot} aria-hidden="true" />
+                        {status.label}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className={styles.cardFooter}>
+                    {mesa.activeOrder ? (
+                      <>
+                        <span className={styles.orderItems}>
+                          {mesa.activeOrder.itemsCount}{' '}
+                          {mesa.activeOrder.itemsCount === 1 ? 'item' : 'itens'}
+                        </span>
+                        <span className={styles.orderTotal}>
+                          R$ {mesa.activeOrder.totalAmount}
+                        </span>
+                      </>
+                    ) : (
+                      <span className={styles.orderEmpty}>Disponível • Abrir comanda</span>
                     )}
-                  </CardActionArea>
-                </Card>
-              </Grid>
+                  </div>
+                </button>
+              </article>
             );
           })}
-          {mesas.length === 0 && !loadError && (
-            <Grid size={12}>
-              <Paper sx={{ p: 4, textAlign: 'center', borderRadius: 2 }}>
-                <Typography color="textSecondary">Nenhuma mesa criada ainda.</Typography>
-              </Paper>
-            </Grid>
-          )}
-        </Grid>
+        </div>
       )}
 
-      <Dialog open={openDialog} onClose={handleCloseDialog} fullWidth maxWidth="xs">
-        <DialogTitle sx={{ color: "black" }}>Criar uma mesa</DialogTitle>
-        <DialogContent>
-          {saveError && <Alert severity="error" sx={{ mb: 2 }}>{saveError}</Alert>}
-          <TextField
+      <Dialog
+        open={openDialog}
+        onClose={handleCloseDialog}
+        fullWidth
+        maxWidth="xs"
+        slotProps={{ paper: { className: styles.dialogPaper } }}
+      >
+        <h2 className={styles.dialogTitle}>Criar uma mesa</h2>
+        <div className={styles.dialogBody}>
+          {saveError && (
+            <div className={styles.errorAlert} role="alert">
+              {saveError}
+            </div>
+          )}
+          <label htmlFor="new-mesa-number" className={styles.label}>
+            Número da mesa
+          </label>
+          <input
+            id="new-mesa-number"
+            className={styles.input}
             autoFocus
-            margin="dense"
-            label="Número da mesa"
             type="number"
-            fullWidth
-            variant="outlined"
+            min={1}
             value={newMesaNumber}
             onChange={(e) => setNewMesaNumber(e.target.value)}
-            onKeyDown={(e) => { if (e.key === 'Enter') handleCreateMesa(); }}
-            slotProps={{ htmlInput: { min: 1 } }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') handleCreateMesa();
+            }}
           />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDialog} disabled={saving}>Cancelar</Button>
-          <Button onClick={handleCreateMesa} variant="contained" disabled={saving}>
-            {saving ? <CircularProgress size={22} color="inherit" /> : 'Criar'}
-          </Button>
-        </DialogActions>
+        </div>
+        <div className={styles.dialogActions}>
+          <button
+            type="button"
+            className={styles.ghostBtn}
+            onClick={handleCloseDialog}
+            disabled={saving}
+          >
+            Cancelar
+          </button>
+          <button
+            type="button"
+            className={styles.primaryBtn}
+            onClick={handleCreateMesa}
+            disabled={saving}
+          >
+            {saving ? <span className={styles.btnSpinner} aria-hidden="true" /> : 'Criar'}
+          </button>
+        </div>
       </Dialog>
 
-      <Dialog open={!!mesaToDelete} onClose={() => setMesaToDelete(null)} fullWidth maxWidth="xs">
-        <DialogTitle sx={{ fontWeight: 'bold', color: 'black' }}>Excluir Mesa</DialogTitle>
-        <DialogContent>
-          {deleteError && <Alert severity="error" sx={{ mb: 2 }}>{deleteError}</Alert>}
-          <DialogContentText>
+      <Dialog
+        open={!!mesaToDelete}
+        onClose={() => setMesaToDelete(null)}
+        fullWidth
+        maxWidth="xs"
+        slotProps={{ paper: { className: styles.dialogPaper } }}
+      >
+        <h2 className={styles.dialogTitle}>Excluir Mesa</h2>
+        <div className={styles.dialogBody}>
+          {deleteError && (
+            <div className={styles.errorAlert} role="alert">
+              {deleteError}
+            </div>
+          )}
+          <p className={styles.dialogText}>
             Tem certeza que deseja excluir a mesa {mesaToDelete?.tableNumber}?
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => { setMesaToDelete(null); setDeleteError(''); }} disabled={deleting}>Cancelar</Button>
-          <Button onClick={handleDeleteMesa} variant="contained" color="error" disabled={deleting}>
-            {deleting ? <CircularProgress size={22} color="inherit" /> : 'Excluir'}
-          </Button>
-        </DialogActions>
+          </p>
+        </div>
+        <div className={styles.dialogActions}>
+          <button
+            type="button"
+            className={styles.ghostBtn}
+            onClick={() => {
+              setMesaToDelete(null);
+              setDeleteError('');
+            }}
+            disabled={deleting}
+          >
+            Cancelar
+          </button>
+          <button
+            type="button"
+            className={styles.dangerBtn}
+            onClick={handleDeleteMesa}
+            disabled={deleting}
+          >
+            {deleting ? <span className={styles.btnSpinner} aria-hidden="true" /> : 'Excluir'}
+          </button>
+        </div>
       </Dialog>
-    </Box>
+    </section>
   );
 }

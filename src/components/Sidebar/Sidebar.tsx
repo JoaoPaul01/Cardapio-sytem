@@ -1,22 +1,12 @@
-import React from 'react';
-import { 
-  Drawer, 
-  List, 
-  ListItem, 
-  ListItemButton, 
-  ListItemIcon, 
-  ListItemText, 
-  Toolbar, 
-  Divider,
-  Typography,
-  Box
-} from '@mui/material';
+import { Drawer } from '@mui/material';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
 import LogoutIcon from '@mui/icons-material/Logout';
 import HistoryIcon from '@mui/icons-material/History';
+import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAppContext } from '../../context/appContext';
+import styles from './Sidebar.module.css';
 
 export const drawerWidth = 260;
 
@@ -32,7 +22,6 @@ export function Sidebar({ mobileOpen, handleDrawerToggle }: SidebarProps) {
 
   const handleNavigation = (path: string) => {
     navigate(path);
-    // Fecha o drawer no mobile ao clicar em um link
     if (mobileOpen) {
       handleDrawerToggle();
     }
@@ -42,119 +31,97 @@ export function Sidebar({ mobileOpen, handleDrawerToggle }: SidebarProps) {
     logout();
   };
 
+  const isMesasActive = location.pathname === '/' || location.pathname === '/mesas';
+
   const drawerContent = (
     <>
-      <Toolbar sx={{ justifyContent: 'center', py: 2 }}>
-        <Typography variant="h6" sx={{ fontWeight: 'bold', color: "#fff"}}>
+      <div className={styles.brandHeader}>
+        <span className={styles.brandBadge}>
+          <LocalFireDepartmentIcon fontSize="inherit" aria-hidden="true" />
           Churrascaria
-        </Typography>
-      </Toolbar>
-      <Divider sx={{ borderColor: 'rgba(255,255,255,0.1)' }} />
-      
-      <Box sx={{ overflow: 'auto', mt: 2, flexGrow: 1 }}>
-        <List>
-          {/* Dashboard */}
-          <ListItem disablePadding>
-            <ListItemButton 
-              selected={location.pathname === '/'} 
+        </span>
+        <h2 className={styles.brandTitle}>Painel &amp; Comanda</h2>
+      </div>
+
+      <div className={styles.menuSection}>
+        <span className={styles.sectionLabel}>Navegação</span>
+        <ul className={styles.navList}>
+          <li>
+            <button
+              type="button"
+              className={`${styles.navItem} ${isMesasActive ? styles.navItemActive : ''}`}
+              aria-current={isMesasActive ? 'page' : undefined}
               onClick={() => handleNavigation('/')}
-              sx={{
-                '&.Mui-selected': { backgroundColor: 'rgba(255,255,255,0.1)' },
-                '&:hover': { backgroundColor: 'rgba(255,255,255,0.05)' }
-              }}
             >
-              <ListItemIcon sx={{ color: '#fff' }}>
+              <span className={styles.navIcon} aria-hidden="true">
                 <DashboardIcon />
-              </ListItemIcon>
-              <ListItemText primary="Mesas" sx={{ color: '#fff' }} />
-            </ListItemButton>
-          </ListItem>
+              </span>
+              <span>Mesas</span>
+            </button>
+          </li>
 
-          {/* Catálogo */}
-          <ListItem disablePadding>
-            <ListItemButton 
-              selected={location.pathname === '/catalogo'} 
+          <li>
+            <button
+              type="button"
+              className={`${styles.navItem} ${location.pathname === '/catalogo' ? styles.navItemActive : ''}`}
+              aria-current={location.pathname === '/catalogo' ? 'page' : undefined}
               onClick={() => handleNavigation('/catalogo')}
-              sx={{
-                '&.Mui-selected': { backgroundColor: 'rgba(255,255,255,0.1)' },
-                '&:hover': { backgroundColor: 'rgba(255,255,255,0.05)' }
-              }}
             >
-              <ListItemIcon sx={{ color: '#fff' }}>
+              <span className={styles.navIcon} aria-hidden="true">
                 <MenuBookIcon />
-              </ListItemIcon>
-              <ListItemText primary="Catálogo" sx={{ color: '#fff' }} />
-            </ListItemButton>
-          </ListItem>
+              </span>
+              <span>Catálogo</span>
+            </button>
+          </li>
 
-          {/* Histórico */}
-          <ListItem disablePadding>
-            <ListItemButton 
-              selected={location.pathname === '/historico'} 
+          <li>
+            <button
+              type="button"
+              className={`${styles.navItem} ${location.pathname === '/historico' ? styles.navItemActive : ''}`}
+              aria-current={location.pathname === '/historico' ? 'page' : undefined}
               onClick={() => handleNavigation('/historico')}
-              sx={{
-                '&.Mui-selected': { backgroundColor: 'rgba(255,255,255,0.1)' },
-                '&:hover': { backgroundColor: 'rgba(255,255,255,0.05)' }
-              }}
             >
-              <ListItemIcon sx={{ color: '#fff' }}>
+              <span className={styles.navIcon} aria-hidden="true">
                 <HistoryIcon />
-              </ListItemIcon>
-              <ListItemText primary="Histórico" sx={{ color: '#fff' }} />
-            </ListItemButton>
-          </ListItem>
-        </List>
-      </Box>
+              </span>
+              <span>Histórico</span>
+            </button>
+          </li>
+        </ul>
+      </div>
 
-      {/* Logout Fixo Embaixo */}
-      <Box sx={{ p: 2 }}>
-        <Divider sx={{ borderColor: 'rgba(255,255,255,0.1)', mb: 2 }} />
-        <List>
-          <ListItem disablePadding>
-            <ListItemButton onClick={handleLogout}>
-              <ListItemIcon sx={{ color: '#ff4c4c' }}>
-                <LogoutIcon />
-              </ListItemIcon>
-              <ListItemText primary="Sair do Sistema" sx={{ color: '#ff4c4c' }} />
-            </ListItemButton>
-          </ListItem>
-        </List>
-      </Box>
+      <div className={styles.footer}>
+        <button type="button" className={styles.logoutBtn} onClick={handleLogout}>
+          <LogoutIcon fontSize="small" aria-hidden="true" />
+          <span>Sair do Sistema</span>
+        </button>
+      </div>
     </>
   );
 
   return (
-    <Box
-      component="nav"
-      sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
-    >
+    <nav className={styles.navWrapper} aria-label="Menu principal">
       {/* Drawer Temporário para Mobile */}
       <Drawer
         variant="temporary"
         open={mobileOpen}
         onClose={handleDrawerToggle}
-        ModalProps={{
-          keepMounted: true, // Melhor performance para abrir/fechar no mobile
-        }}
-        sx={{
-          display: { xs: 'block', sm: 'none' },
-          '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth, backgroundColor: '#1e1e2d' },
-        }}
+        ModalProps={{ keepMounted: true }}
+        className={styles.drawerTemp}
+        slotProps={{ paper: { className: styles.drawerPaper } }}
       >
         {drawerContent}
       </Drawer>
-      
+
       {/* Drawer Permanente para Desktop */}
       <Drawer
         variant="permanent"
-        sx={{
-          display: { xs: 'none', sm: 'block' },
-          '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth, backgroundColor: '#1e1e2d' },
-        }}
         open
+        className={styles.drawerPerm}
+        slotProps={{ paper: { className: styles.drawerPaper } }}
       >
         {drawerContent}
       </Drawer>
-    </Box>
+    </nav>
   );
 }

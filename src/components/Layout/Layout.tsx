@@ -1,14 +1,7 @@
 import React, { useState } from 'react';
-import { 
-  Box, 
-  CssBaseline, 
-  AppBar, 
-  Toolbar, 
-  IconButton, 
-  Typography 
-} from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
-import { Sidebar, drawerWidth } from '../Sidebar/Sidebar';
+import { Sidebar } from '../Sidebar/Sidebar';
+import styles from './Layout.module.css';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -22,52 +15,24 @@ export function Layout({ children }: LayoutProps) {
   };
 
   return (
-    <Box sx={{ display: 'flex', minHeight: '100vh', backgroundColor: '#f4f6f8' }}>
-      <CssBaseline />
-      
-      {/* AppBar aparece apenas no mobile */}
-      <AppBar
-        position="fixed"
-        sx={{
-          width: { sm: `calc(100% - ${drawerWidth}px)` },
-          ml: { sm: `${drawerWidth}px` },
-          display: { sm: 'none' },
-          backgroundColor: '#1e1e2d'
-        }}
-      >
-        <Toolbar>
-          <IconButton
-            color="inherit"
-            aria-label="open drawer"
-            edge="start"
-            onClick={handleDrawerToggle}
-            sx={{ mr: 2, display: { sm: 'none' } }}
-          >
-            <MenuIcon />
-          </IconButton>
-          <Typography variant="h6" noWrap component="div">
-            Churrascaria
-          </Typography>
-        </Toolbar>
-      </AppBar>
+    <div className={styles.shell}>
+      <header className={styles.mobileBar}>
+        <button
+          type="button"
+          className={styles.menuBtn}
+          aria-label="Abrir menu lateral"
+          onClick={handleDrawerToggle}
+        >
+          <MenuIcon aria-hidden="true" />
+        </button>
+        <span className={styles.mobileTitle}>Churrascaria</span>
+      </header>
 
-      {/* Sidebar Responsiva */}
       <Sidebar mobileOpen={mobileOpen} handleDrawerToggle={handleDrawerToggle} />
-      
-      {/* Área de conteúdo principal */}
-      <Box 
-        component="main" 
-        sx={{ 
-          flexGrow: 1, 
-          p: { xs: 2, sm: 4 }, 
-          width: { xs: '100%', sm: `calc(100% - ${drawerWidth}px)` },
-          maxWidth: '100%',
-          overflowX: 'hidden',
-          mt: { xs: 8, sm: 0 } // Espaço para a AppBar no mobile
-        }}
-      >
+
+      <main className={styles.main}>
         {children}
-      </Box>
-    </Box>
+      </main>
+    </div>
   );
 }

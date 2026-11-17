@@ -1,25 +1,6 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import {
-  Box,
-  Typography,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemText,
-  Button,
-  TextField,
-  InputAdornment,
-  Card,
-  CardContent,
-  CardMedia,
-  CardActionArea,
-  Badge,
-  CircularProgress,
-  Alert,
-  Dialog,
-  IconButton
-} from '@mui/material';
+import { Badge, Dialog } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -31,6 +12,7 @@ import { locations } from '../../services/locations';
 import { ProductDialog } from './components/ProductDialog';
 import { CheckoutDialog } from './components/CheckoutDialog';
 import { PixPaymentDialog } from '../../components/PixPayment/PixPaymentDialog';
+import styles from './MesaView.module.css';
 
 interface CartItem {
   product: any;
@@ -41,7 +23,6 @@ interface CartItem {
 export default function MesaView() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  // Uma única chamada do contexto, com tudo o que o componente precisa
   const { getData, postData, patchData } = useAppContext();
 
   const [categories, setCategories] = useState<any[]>([]);
@@ -203,271 +184,223 @@ export default function MesaView() {
 
   // Filtra categorias e produtos ativos para exibição no cardápio do cliente
   const filteredCategories = categories
-    .filter(cat => cat.isActive !== false) // Oculta categorias pausadas
+    .filter(cat => cat.isActive !== false)
     .map(cat => {
-      const products = (cat.products || []).filter((p: any) => p.isActive !== false); // Oculta produtos pausados
+      const products = (cat.products || []).filter((p: any) => p.isActive !== false);
       const filteredProducts = products.filter((p: any) =>
         p.name.toLowerCase().includes(filterText.toLowerCase()) ||
         cat.name.toLowerCase().includes(filterText.toLowerCase())
       );
       return { ...cat, products: filteredProducts };
     }).filter(cat => {
-      // text filter
       const matchesText = cat.name.toLowerCase().includes(filterText.toLowerCase()) || (cat.products && cat.products.length > 0);
-      // category selection filter
       const matchesCategory = selectedCategory === 'ALL' || cat.id === selectedCategory;
-      
       return matchesText && matchesCategory;
     });
 
   const cartTotalItems = cartItems.reduce((acc, item) => acc + item.qty, 0);
 
   return (
-    <Box sx={{ display: 'flex', height: '100vh', overflow: 'hidden', backgroundColor: '#f5f5f5' }}>
-      {/* Sidebar */}
-      <Box sx={{
-        width: 250,
-        flexShrink: 0,
-        bgcolor: '#ffffff',
-        borderRight: '1px solid #ddd',
-        display: { xs: 'none', md: 'flex' },
-        flexDirection: 'column',
-        overflowY: 'auto'
-      }}>
-        <Box sx={{ p: 3, textAlign: 'center', borderBottom: '1px solid #ddd' }}>
-        </Box>
-        <Box sx={{ p: 2 }}>
-          <Button
-            startIcon={<ArrowBackIcon />}
-            onClick={() => navigate('/')}
-            fullWidth
-            variant="text"
-            sx={{ justifyContent: 'flex-start', mb: 2 }}
-          >
-            Início
-          </Button>
-          <Typography variant="overline" color="textSecondary" sx={{ px: 2 }}>
-            CATEGORIAS
-          </Typography>
-          <List>
-            {categories.map((cat, idx) => (
-              <ListItem disablePadding key={cat.id || idx}>
-                <ListItemButton onClick={() => scrollToCategory(cat.id)} sx={{ borderRadius: 1 }}>
-                  <ListItemText primary={cat.name} />
-                </ListItemButton>
-              </ListItem>
-            ))}
-          </List>
-        </Box>
-      </Box>
+    <div className={styles.page}>
+      {/* Sidebar Desktop */}
+      <aside className={styles.sidebar} aria-label="Categorias do cardápio">
+        <button type="button" className={styles.backButton} onClick={() => navigate('/')}>
+          <ArrowBackIcon fontSize="small" aria-hidden="true" />
+          Início
+        </button>
+
+        <span className={styles.sidebarLabel}>Categorias</span>
+        <ul className={styles.navList}>
+          {categories.map((cat, idx) => (
+            <li key={cat.id || idx}>
+              <button
+                type="button"
+                className={styles.navBtn}
+                onClick={() => scrollToCategory(cat.id)}
+              >
+                {cat.name}
+              </button>
+            </li>
+          ))}
+        </ul>
+      </aside>
 
       {/* Main Content */}
-      <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-        {/* Header */}
-        <Box sx={{
-          p: 2,
-          bgcolor: '#ffffff',
-          borderBottom: '1px solid #ddd',
-          display: 'flex',
-          flexDirection: { xs: 'column', sm: 'row' },
-          alignItems: { xs: 'stretch', sm: 'center' },
-          gap: 2,
-          justifyContent: 'space-between'
-        }}>
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <IconButton 
-              sx={{ display: { xs: 'flex', md: 'none' }, mr: 1 }} 
-              onClick={() => navigate('/')}
-            >
-              <ArrowBackIcon />
-            </IconButton>
-            <Typography variant="h6">
-              {mesa ? `Mesa ${mesa.tableNumber}` : 'Mesa'}
-            </Typography>
-          </Box>
+      <div className={styles.main}>
+        <header className={styles.header}>
+          <div className={styles.headerTop}>
+            <div className={styles.titleGroup}>
+              <button
+                type="button"
+                className={styles.iconBtn}
+                onClick={() => navigate('/')}
+                aria-label="Voltar para mesas"
+              >
+                <ArrowBackIcon aria-hidden="true" />
+              </button>
+              <h1 className={styles.tableTitle}>
+                {mesa ? `Mesa ${mesa.tableNumber}` : 'Mesa'}
+              </h1>
+            </div>
+          </div>
 
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: { xs: 'wrap', sm: 'nowrap' } }}>
-            <TextField
-              size="small"
-              placeholder="O que deseja pedir?"
-              value={filterText}
-              onChange={(e) => setFilterText(e.target.value)}
-              sx={{ flexGrow: 1, minWidth: 150 }}
-              slotProps={{
-                input: {
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SearchIcon />
-                    </InputAdornment>
-                  ),
-                },
-              }}
-            />
-            <Button
-              variant="contained"
-              startIcon={
-                <Badge badgeContent={cartTotalItems} color="error">
-                  <ShoppingCartIcon />
-                </Badge>
-              }
+          <div className={styles.controls}>
+            <label htmlFor="mesa-search" className={styles.srOnly}>
+              Buscar produto ou categoria
+            </label>
+            <div className={styles.searchWrap}>
+              <SearchIcon aria-hidden="true" />
+              <input
+                id="mesa-search"
+                type="search"
+                className={styles.searchInput}
+                placeholder="O que deseja pedir?"
+                value={filterText}
+                onChange={(e) => setFilterText(e.target.value)}
+              />
+            </div>
+
+            <button
+              type="button"
+              className={styles.cartButton}
               onClick={() => setCheckoutDialogOpen(true)}
-              sx={{ borderRadius: 5, whiteSpace: 'nowrap' }}
             >
-              Carrinho
-            </Button>
-          </Box>
-        </Box>
+              <Badge badgeContent={cartTotalItems} color="error">
+                <ShoppingCartIcon aria-hidden="true" />
+              </Badge>
+              <span>Carrinho</span>
+            </button>
+          </div>
+        </header>
 
         {/* Scrollable Content */}
-        <Box sx={{ flex: 1, overflowY: 'auto', p: 3 }}>
+        <main className={styles.content}>
           {/* Banner de Comanda Aberta */}
           {mesa?.activeOrder && (
-            <Alert
-              severity="warning"
-              icon={<QrCode2Icon />}
-              action={
-                <Button
-                  color="inherit"
-                  size="small"
-                  variant="outlined"
-                  sx={{ fontWeight: 'bold' }}
-                  onClick={() => {
-                    setPixOrderId(mesa.activeOrder.id);
-                    setPixDialogOpen(true);
-                  }}
-                >
-                  Pagar via Pix (Mercado Pago)
-                </Button>
-              }
-              sx={{ mb: 3, borderRadius: 2 }}
-            >
-              Esta mesa possui comanda aberta no valor de{' '}
-              <strong>
-                {Number(mesa.activeOrder.totalAmount || 0).toLocaleString('pt-BR', {
-                  style: 'currency',
-                  currency: 'BRL',
-                })}
-              </strong>
-            </Alert>
+            <div className={styles.orderBanner} role="region" aria-label="Comanda aberta">
+              <div className={styles.orderBannerInfo}>
+                <QrCode2Icon className={styles.orderBannerIcon} aria-hidden="true" />
+                <span>
+                  Esta mesa possui comanda aberta no valor de{' '}
+                  <strong className={styles.orderBannerAmount}>
+                    {Number(mesa.activeOrder.totalAmount || 0).toLocaleString('pt-BR', {
+                      style: 'currency',
+                      currency: 'BRL',
+                    })}
+                  </strong>
+                </span>
+              </div>
+              <button
+                type="button"
+                className={styles.pixBannerBtn}
+                onClick={() => {
+                  setPixOrderId(mesa.activeOrder.id);
+                  setPixDialogOpen(true);
+                }}
+              >
+                Pagar via Pix (Mercado Pago)
+              </button>
+            </div>
           )}
 
           {/* Category Selector */}
           {!loading && !loadError && categories.length > 0 && (
-            <Box sx={{
-              display: 'flex',
-              overflowX: 'auto',
-              gap: 2,
-              mb: 4,
-              pb: 1,
-              '&::-webkit-scrollbar': { height: 6 },
-              '&::-webkit-scrollbar-thumb': { backgroundColor: '#ccc', borderRadius: 3 }
-            }}>
-              <Button
-                variant={selectedCategory === 'ALL' ? 'contained' : 'outlined'}
+            <div className={styles.pillsRow} role="tablist" aria-label="Filtrar por categoria">
+              <button
+                type="button"
+                role="tab"
+                aria-selected={selectedCategory === 'ALL'}
+                className={`${styles.pill} ${selectedCategory === 'ALL' ? styles.pillActive : ''}`}
                 onClick={() => setSelectedCategory('ALL')}
-                sx={{ borderRadius: 20, whiteSpace: 'nowrap', textTransform: 'none', px: 3, flexShrink: 0 }}
               >
                 Ver todos
-              </Button>
+              </button>
               {categories.map((cat, idx) => (
-                <Button
+                <button
                   key={cat.id || idx}
-                  variant={selectedCategory === cat.id ? 'contained' : 'outlined'}
+                  type="button"
+                  role="tab"
+                  aria-selected={selectedCategory === cat.id}
+                  className={`${styles.pill} ${selectedCategory === cat.id ? styles.pillActive : ''}`}
                   onClick={() => setSelectedCategory(cat.id)}
-                  sx={{ borderRadius: 20, whiteSpace: 'nowrap', textTransform: 'none', px: 3, flexShrink: 0 }}
                 >
                   {cat.name}
-                </Button>
+                </button>
               ))}
-            </Box>
+            </div>
           )}
 
           {loadError && (
-            <Alert severity="error" sx={{ mb: 3 }} action={<Button color="inherit" onClick={() => fetchData()}>Tentar novamente</Button>}>
-              {loadError}
-            </Alert>
+            <div className={styles.errorAlert} role="alert">
+              <span>{loadError}</span>
+              <button type="button" className={styles.retryBtn} onClick={() => fetchData()}>
+                Tentar novamente
+              </button>
+            </div>
           )}
 
           {loading && (
-            <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}>
-              <CircularProgress />
-            </Box>
+            <div className={styles.stateBox} role="status" aria-live="polite">
+              <div className={styles.spinner} aria-hidden="true" />
+              <span>Carregando cardápio...</span>
+            </div>
           )}
 
           {!loading && !loadError && filteredCategories.length === 0 && (
-            <Typography color="textSecondary" sx={{ textAlign: 'center' }}>
-              Nenhuma categoria/produto encontrado.
-            </Typography>
+            <div className={styles.stateBox}>
+              <p>Nenhuma categoria/produto encontrado.</p>
+            </div>
           )}
 
           {/* Catalog */}
           {!loading && filteredCategories.map((category, idx) => (
-            <Box key={category.id || idx} id={`cat-${category.id}`} sx={{ mb: 4, scrollMarginTop: 16 }}>
-              <Typography variant="h5" color="primary" sx={{ mb: 2, fontWeight: 'bold' }}>
-                {category.name}
-              </Typography>
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
+            <section key={category.id || idx} id={`cat-${category.id}`} className={styles.categorySection}>
+              <h2 className={styles.categoryTitle}>{category.name}</h2>
+              <div className={styles.productGrid}>
                 {category.products.map((product: any, pIdx: number) => (
-                  <Card key={product.id || pIdx} sx={{ width: 380, maxWidth: '100%', borderRadius: 2 }}>
-                    <CardActionArea 
-                      onClick={() => handleOpenProductDialog(product)} 
-                      sx={{ display: 'flex', alignItems: 'center', p: 1.5, gap: 1.5, justifyContent: 'flex-start' }}
-                    >
-                      {/* Imagem do produto à esquerda */}
-                      {product.imageUrl ? (
-                        <CardMedia
-                          component="img"
-                          image={product.imageUrl}
-                          alt={product.name}
-                          sx={{ width: { xs: 75, sm: 85 }, height: { xs: 75, sm: 85 }, minWidth: { xs: 75, sm: 85 }, objectFit: 'cover', borderRadius: 2 }}
-                          onError={(e: any) => {
-                            e.currentTarget.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 24 24" fill="%239e9e9e"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>';
-                          }}
-                        />
-                      ) : (
-                        <Box sx={{
-                          width: { xs: 75, sm: 85 },
-                          height: { xs: 75, sm: 85 },
-                          minWidth: { xs: 75, sm: 85 },
-                          backgroundColor: '#f0f0f0',
-                          borderRadius: 2,
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          color: '#9e9e9e',
-                          fontSize: '0.75rem',
-                          fontWeight: 500
-                        }}>
-                          Sem Foto
-                        </Box>
-                      )}
+                  <button
+                    key={product.id || pIdx}
+                    type="button"
+                    className={styles.productCard}
+                    onClick={() => handleOpenProductDialog(product)}
+                  >
+                    {product.imageUrl ? (
+                      <img
+                        src={product.imageUrl}
+                        alt={product.name}
+                        className={styles.productImage}
+                        onError={(e: any) => {
+                          e.currentTarget.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 24 24" fill="%239e9e9e"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>';
+                        }}
+                      />
+                    ) : (
+                      <div className={styles.noPhoto} aria-hidden="true">
+                        Sem Foto
+                      </div>
+                    )}
 
-                      <CardContent sx={{ flex: 1, minWidth: 0, p: 0, '&:last-child': { pb: 0 } }}>
-                        <Typography variant="subtitle1" noWrap sx={{ fontWeight: 'bold', fontSize: { xs: '0.95rem', sm: '1rem' } }}>
-                          {product.name}
-                        </Typography>
-                        <Typography variant="body2" color="textSecondary" sx={{
-                          display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', minHeight: 18, fontSize: { xs: '0.8rem', sm: '0.85rem' }
-                        }}>
-                          {product.description || 'Sem descrição'}
-                        </Typography>
-                        <Typography variant="subtitle1" color="primary" sx={{ mt: 0.5, fontWeight: 'bold', fontSize: { xs: '0.95rem', sm: '1.05rem' } }}>
-                          {Number(product.price || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-                        </Typography>
-                      </CardContent>
-                    </CardActionArea>
-                  </Card>
+                    <div className={styles.productBody}>
+                      <h3 className={styles.productName}>{product.name}</h3>
+                      <p className={styles.productDesc}>
+                        {product.description || 'Sem descrição'}
+                      </p>
+                      <span className={styles.productPrice}>
+                        {Number(product.price || 0).toLocaleString('pt-BR', {
+                          style: 'currency',
+                          currency: 'BRL',
+                        })}
+                      </span>
+                    </div>
+                  </button>
                 ))}
                 {category.products.length === 0 && (
-                  <Typography variant="body2" color="textSecondary">
-                    Nenhum produto nesta categoria.
-                  </Typography>
+                  <p className={styles.emptyCategory}>Nenhum produto nesta categoria.</p>
                 )}
-              </Box>
-            </Box>
+              </div>
+            </section>
           ))}
-        </Box>
-      </Box>
+        </main>
+      </div>
 
       {/* Dialogs */}
       <ProductDialog
@@ -501,26 +434,13 @@ export default function MesaView() {
       />
 
       {/* Success Dialog (Animation) */}
-      <Dialog open={isSuccessDialogOpen} sx={{ '& .MuiDialog-paper': { backgroundColor: 'transparent', boxShadow: 'none' } }}>
-        <Box sx={{ p: 4, display: 'flex', flexDirection: 'column', alignItems: 'center', bgcolor: 'rgba(255, 255, 255, 0.9)', borderRadius: 4 }}>
-          <CheckCircleIcon sx={{ fontSize: 100, color: 'success.main', mb: 2, animation: 'pulse 1.5s infinite' }} />
-          <Typography variant="h5" sx={{ fontWeight: 'bold', color: 'success.dark', mb: 1 }}>
-            Mesa Fechada!
-          </Typography>
-          <Typography variant="body1" color="textSecondary">
-            Pagamento recebido com sucesso.
-          </Typography>
-          <style>
-            {`
-              @keyframes pulse {
-                0% { transform: scale(0.9); opacity: 0.8; }
-                50% { transform: scale(1.1); opacity: 1; }
-                100% { transform: scale(0.9); opacity: 0.8; }
-              }
-            `}
-          </style>
-        </Box>
+      <Dialog open={isSuccessDialogOpen} slotProps={{ paper: { className: styles.successPaper } }}>
+        <div className={styles.successBox}>
+          <CheckCircleIcon className={styles.successIcon} aria-hidden="true" />
+          <h2 className={styles.successTitle}>Mesa Fechada!</h2>
+          <p className={styles.successText}>Pagamento recebido com sucesso.</p>
+        </div>
       </Dialog>
-    </Box>
+    </div>
   );
 }

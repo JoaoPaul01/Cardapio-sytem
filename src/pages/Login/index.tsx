@@ -75,7 +75,7 @@ export function Login() {
           </div>
 
           <div className={styles.field}>
-            <label htmlFor="login-password" className={styles.label}>Senha de acesso</label>
+            <label htmlFor="login-password" className={styles.label}>Senha</label>
             <div className={styles.inputWrap}>
               <LockOutlinedIcon aria-hidden="true" />
               <input
@@ -108,17 +108,13 @@ export function Login() {
                 Entrando...
               </>
             ) : (
-              'Abrir sistema'
+              'Entrar'
             )}
           </button>
         </form>
 
         <footer className={styles.footer}>
           <span>Versão PWA 2.0</span>
-          <span>
-            <LockOutlinedIcon sx={{ fontSize: 14 }} aria-hidden="true" />
-            Terminal seguro
-          </span>
         </footer>
       </section>
     </main>
