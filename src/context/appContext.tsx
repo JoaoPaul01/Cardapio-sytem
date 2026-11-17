@@ -1,4 +1,4 @@
-import React, { createContext, useContext, ReactNode, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, type ReactNode, useState, useEffect, useCallback } from 'react';
 import api from '../services/api';
 
 interface AppContextProps {
@@ -8,6 +8,7 @@ interface AppContextProps {
   logout: () => void;
   getData: (endpoint: string, params?: any) => Promise<any>;
   postData: (endpoint: string, data: any) => Promise<any>;
+  putData: (endpoint: string, data: any) => Promise<any>;
   patchData: (endpoint: string, data: any) => Promise<any>;
   removeData: (endpoint: string) => Promise<any>;
   uploadImageData: (endpoint: string, file: File) => Promise<any>;
@@ -68,6 +69,12 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     return response.data;
   }, []);
 
+  // PUT
+  const putData = useCallback(async (endpoint: string, data: any) => {
+    const response = await api.put(endpoint, data);
+    return response.data;
+  }, []);
+
   // PATCH
   const patchData = useCallback(async (endpoint: string, data: any) => {
     const response = await api.patch(endpoint, data);
@@ -104,6 +111,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         logout, 
         getData, 
         postData, 
+        putData,
         patchData, 
         removeData, 
         uploadImageData 

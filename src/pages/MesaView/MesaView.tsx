@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Badge, Dialog } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
@@ -10,20 +10,14 @@ import QrCode2Icon from '@mui/icons-material/QrCode2';
 import { useAppContext } from '../../context/appContext';
 import { locations } from '../../services/locations';
 import { ProductDialog } from './components/ProductDialog';
-import { CheckoutDialog } from './components/CheckoutDialog';
+import { CheckoutDialog, type CartItem } from './components/CheckoutDialog';
 import { PixPaymentDialog } from '../../components/PixPayment/PixPaymentDialog';
 import styles from './MesaView.module.css';
-
-interface CartItem {
-  product: any;
-  qty: number;
-  observations: string;
-}
 
 export default function MesaView() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { getData, postData, patchData } = useAppContext();
+  const { getData, postData, putData, patchData, removeData } = useAppContext();
 
   const [categories, setCategories] = useState<any[]>([]);
   const [mesa, setMesa] = useState<any>(null);
@@ -31,8 +25,17 @@ export default function MesaView() {
   const [loadError, setLoadError] = useState('');
   const [filterText, setFilterText] = useState('');
 
-  // Cart state
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  // Cart state persisted per table in localStorage
+  const cartStorageKey = id ? `cardapio_cart_mesa_${id}` : '';
+  const [cartItems, setCartItems] = useState<CartItem[]>(() => {
+    if (!id) return [];
+    try {
+      const saved = localStorage.getItem(`cardapio_cart_mesa_${id}`);
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
 
   // Dialogs state
   const [selectedProduct, setSelectedProduct] = useState<any | null>(null);
@@ -41,6 +44,33 @@ export default function MesaView() {
   const [isSuccessDialogOpen, setSuccessDialogOpen] = useState(false);
   const [isPixDialogOpen, setPixDialogOpen] = useState(false);
   const [pixOrderId, setPixOrderId] = useState<string | null>(null);
+  const [isPixLoading, setIsPixLoading] = useState(false);
+  const [isManualLoading, setIsManualLoading] = useState(false);
+  const [isConfirmingNewItems, setIsConfirmingNewItems] = useState(false);
+  const [isUpdatingOrder, setIsUpdatingOrder] = useState(false);
+
+  // Sincroniza cartItems com localStorage
+  useEffect(() => {
+    if (cartStorageKey) {
+      if (cartItems.length > 0) {
+        localStorage.setItem(cartStorageKey, JSON.stringify(cartItems));
+      } else {
+        localStorage.removeItem(cartStorageKey);
+      }
+    }
+  }, [cartItems, cartStorageKey]);
+
+  // Recarrega itens do carrinho caso o id da mesa mude
+  useEffect(() => {
+    if (id) {
+      try {
+        const saved = localStorage.getItem(`cardapio_cart_mesa_${id}`);
+        setCartItems(saved ? JSON.parse(saved) : []);
+      } catch {
+        setCartItems([]);
+      }
+    }
+  }, [id]);
 
   const fetchData = useCallback(async (silent = false) => {
     if (!silent) setLoading(true);
@@ -79,38 +109,163 @@ export default function MesaView() {
   };
 
   const handleAddToCart = (product: any, qty: number, observations: string, goToCart: boolean) => {
-    setCartItems(prev => [...prev, { product, qty, observations }]);
+    setCartItems(prev => {
+      const existingIdx = prev.findIndex(
+        item => item.product?.id === product.id && item.observations === (observations || '')
+      );
+      if (existingIdx >= 0 && prev[existingIdx]) {
+        const updated = [...prev];
+        const existing = prev[existingIdx]!;
+        updated[existingIdx] = {
+          product: existing.product,
+          observations: existing.observations,
+          qty: existing.qty + qty,
+        };
+        return updated;
+      }
+      return [...prev, { product, qty, observations }];
+    });
+
     handleCloseProductDialog();
     if (goToCart) {
       setCheckoutDialogOpen(true);
     }
   };
 
-  const handleFinishCheckout = async () => {
+  const handleUpdateCartItemQty = (index: number, newQty: number) => {
+    if (newQty <= 0) {
+      handleRemoveCartItem(index);
+      return;
+    }
+    setCartItems(prev => {
+      const existing = prev[index];
+      if (!existing) return prev;
+      const updated = [...prev];
+      updated[index] = {
+        product: existing.product,
+        observations: existing.observations,
+        qty: newQty,
+      };
+      return updated;
+    });
+  };
+
+  const handleRemoveCartItem = (index: number) => {
+    setCartItems(prev => prev.filter((_, idx) => idx !== index));
+  };
+
+  // Remove item já lançado no banco
+  const handleRemoveActiveItem = async (itemId: string) => {
+    if (!mesa?.activeOrder) return;
+    const confirm = window.confirm('Deseja realmente remover este item da comanda?');
+    if (!confirm) return;
+
+    setIsUpdatingOrder(true);
+    try {
+      await removeData(`${locations.orders}/${mesa.activeOrder.id}/items/${itemId}`);
+      await fetchData(true);
+    } catch (error: any) {
+      console.error('Erro ao remover item da comanda', error);
+      alert(error?.response?.data?.error || 'Erro ao remover item da comanda.');
+    } finally {
+      setIsUpdatingOrder(false);
+    }
+  };
+
+  // Atualiza quantidade de item já lançado no banco com indicador de carregamento
+  const handleUpdateActiveItemQty = async (itemId: string, newQty: number) => {
+    if (!mesa?.activeOrder) return;
+    if (newQty <= 0) {
+      handleRemoveActiveItem(itemId);
+      return;
+    }
+
+    setIsUpdatingOrder(true);
+    try {
+      await putData(`${locations.orders}/${mesa.activeOrder.id}/items/${itemId}`, {
+        quantity: newQty,
+      });
+      await fetchData(true);
+    } catch (error: any) {
+      console.error('Erro ao atualizar quantidade do item na comanda', error);
+      alert(error?.response?.data?.error || 'Erro ao atualizar quantidade do item.');
+      await fetchData(true);
+    } finally {
+      setIsUpdatingOrder(false);
+    }
+  };
+
+  // Lança novos itens na comanda sem fechar a conta
+  const handleConfirmNewItems = async () => {
     if (cartItems.length === 0 || !mesa) return;
 
-    setLoading(true);
-    setLoadError('');
+    setIsConfirmingNewItems(true);
     try {
       const itemsPayload = cartItems.map(item => ({
         productId: item.product.id,
         quantity: item.qty,
-        notes: item.observations || ''
+        notes: item.observations || '',
       }));
 
-      // Cria a comanda para a mesa
-      const newOrder = await postData(locations.orders, {
-        tableId: mesa.id,
-        items: itemsPayload
-      });
-
-      // Atualiza o status para CLOSED
-      await patchData(`${locations.orders}/${newOrder.id}/status`, { status: 'CLOSED' });
+      if (mesa.activeOrder) {
+        await postData(`${locations.orders}/${mesa.activeOrder.id}/items`, {
+          items: itemsPayload,
+        });
+      } else {
+        await postData(locations.orders, {
+          tableId: mesa.id,
+          items: itemsPayload,
+        });
+      }
 
       setCartItems([]);
-      setCheckoutDialogOpen(false);
+      if (cartStorageKey) localStorage.removeItem(cartStorageKey);
+      await fetchData(true);
+    } catch (error: any) {
+      console.error('Erro ao lançar itens na comanda', error);
+      alert(error?.response?.data?.error || 'Erro ao lançar itens na comanda.');
+    } finally {
+      setIsConfirmingNewItems(false);
+    }
+  };
 
-      // Exibe a animação
+  // Dar baixa manual e fechar comanda
+  const handleFinishCheckout = async () => {
+    if (!mesa) return;
+    const hasActive = !!mesa.activeOrder;
+    const hasCart = cartItems.length > 0;
+    if (!hasActive && !hasCart) return;
+
+    setIsManualLoading(true);
+    setLoadError('');
+    try {
+      let orderId = mesa.activeOrder?.id;
+
+      if (hasCart) {
+        const itemsPayload = cartItems.map(item => ({
+          productId: item.product.id,
+          quantity: item.qty,
+          notes: item.observations || '',
+        }));
+
+        if (hasActive) {
+          await postData(`${locations.orders}/${orderId}/items`, { items: itemsPayload });
+        } else {
+          const newOrder = await postData(locations.orders, {
+            tableId: mesa.id,
+            items: itemsPayload,
+          });
+          orderId = newOrder.id;
+        }
+        setCartItems([]);
+        if (cartStorageKey) localStorage.removeItem(cartStorageKey);
+      }
+
+      if (orderId) {
+        await patchData(`${locations.orders}/${orderId}/status`, { status: 'CLOSED' });
+      }
+
+      setCheckoutDialogOpen(false);
       setSuccessDialogOpen(true);
       setTimeout(() => {
         setSuccessDialogOpen(false);
@@ -118,65 +273,53 @@ export default function MesaView() {
       }, 2500);
     } catch (error: any) {
       console.error('Erro ao finalizar pedido', error);
-      alert(error?.response?.data?.error || 'Erro ao finalizar o pedido. Verifique se a mesa já possui uma comanda aberta.');
+      alert(error?.response?.data?.error || 'Erro ao finalizar o pedido.');
     } finally {
-      setLoading(false);
+      setIsManualLoading(false);
     }
   };
 
+  // Pagar via Pix (Mercado Pago)
   const handlePayWithPix = async () => {
     if (!mesa) return;
+    const hasActive = !!mesa.activeOrder;
+    const hasCart = cartItems.length > 0;
+    if (!hasActive && !hasCart) return;
 
-    // Se a mesa já possui comanda aberta
-    if (mesa.activeOrder) {
-      setLoading(true);
-      try {
-        if (cartItems.length > 0) {
-          const itemsPayload = cartItems.map(item => ({
-            productId: item.product.id,
-            quantity: item.qty,
-            notes: item.observations || ''
-          }));
-          await postData(`${locations.orders}/${mesa.activeOrder.id}/items`, { items: itemsPayload });
-          setCartItems([]);
-        }
-        setCheckoutDialogOpen(false);
-        setPixOrderId(mesa.activeOrder.id);
-        setPixDialogOpen(true);
-      } catch (error: any) {
-        console.error('Erro ao adicionar itens e gerar Pix', error);
-        alert(error?.response?.data?.error || 'Erro ao preparar pagamento Pix.');
-      } finally {
-        setLoading(false);
-      }
-      return;
-    }
-
-    if (cartItems.length === 0) return;
-
-    setLoading(true);
+    setIsPixLoading(true);
     setLoadError('');
     try {
-      const itemsPayload = cartItems.map(item => ({
-        productId: item.product.id,
-        quantity: item.qty,
-        notes: item.observations || ''
-      }));
+      let orderId = mesa.activeOrder?.id;
 
-      const newOrder = await postData(locations.orders, {
-        tableId: mesa.id,
-        items: itemsPayload
-      });
+      if (hasCart) {
+        const itemsPayload = cartItems.map(item => ({
+          productId: item.product.id,
+          quantity: item.qty,
+          notes: item.observations || '',
+        }));
 
-      setCartItems([]);
+        if (hasActive) {
+          await postData(`${locations.orders}/${orderId}/items`, { items: itemsPayload });
+        } else {
+          const newOrder = await postData(locations.orders, {
+            tableId: mesa.id,
+            items: itemsPayload,
+          });
+          orderId = newOrder.id;
+        }
+        setCartItems([]);
+        if (cartStorageKey) localStorage.removeItem(cartStorageKey);
+        await fetchData(true);
+      }
+
       setCheckoutDialogOpen(false);
-      setPixOrderId(newOrder.id);
+      setPixOrderId(orderId);
       setPixDialogOpen(true);
     } catch (error: any) {
-      console.error('Erro ao abrir comanda para pagamento Pix', error);
-      alert(error?.response?.data?.error || 'Erro ao processar pedido.');
+      console.error('Erro ao preparar pagamento Pix', error);
+      alert(error?.response?.data?.error || 'Erro ao preparar pagamento Pix.');
     } finally {
-      setLoading(false);
+      setIsPixLoading(false);
     }
   };
 
@@ -198,7 +341,20 @@ export default function MesaView() {
       return matchesText && matchesCategory;
     });
 
-  const cartTotalItems = cartItems.reduce((acc, item) => acc + item.qty, 0);
+  // Cálculo preciso do total da comanda ativa (fallback para os itens caso totalAmount venha vazio)
+  const activeOrderTotal = mesa?.activeOrder?.totalAmount
+    ? Number(mesa.activeOrder.totalAmount)
+    : (mesa?.activeOrder?.items || []).reduce((acc: number, item: any) => {
+        const price = Number(item.unitPrice || item.product?.price || 0);
+        return acc + price * (item.quantity || 1);
+      }, 0);
+
+  const activeOrderItemsCount = (mesa?.activeOrder?.items || []).reduce(
+    (acc: number, item: any) => acc + (item.quantity || 1),
+    0
+  );
+  const cartPendingItemsCount = cartItems.reduce((acc, item) => acc + item.qty, 0);
+  const totalCartBadgeCount = activeOrderItemsCount + cartPendingItemsCount;
 
   return (
     <div className={styles.page}>
@@ -265,7 +421,7 @@ export default function MesaView() {
               className={styles.cartButton}
               onClick={() => setCheckoutDialogOpen(true)}
             >
-              <Badge badgeContent={cartTotalItems} color="error">
+              <Badge badgeContent={totalCartBadgeCount} color="error">
                 <ShoppingCartIcon aria-hidden="true" />
               </Badge>
               <span>Carrinho</span>
@@ -283,23 +439,33 @@ export default function MesaView() {
                 <span>
                   Esta mesa possui comanda aberta no valor de{' '}
                   <strong className={styles.orderBannerAmount}>
-                    {Number(mesa.activeOrder.totalAmount || 0).toLocaleString('pt-BR', {
+                    {activeOrderTotal.toLocaleString('pt-BR', {
                       style: 'currency',
                       currency: 'BRL',
                     })}
                   </strong>
                 </span>
               </div>
-              <button
-                type="button"
-                className={styles.pixBannerBtn}
-                onClick={() => {
-                  setPixOrderId(mesa.activeOrder.id);
-                  setPixDialogOpen(true);
-                }}
-              >
-                Pagar via Pix (Mercado Pago)
-              </button>
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  className={styles.pixBannerBtn}
+                  onClick={() => setCheckoutDialogOpen(true)}
+                  style={{ background: '#475569' }}
+                >
+                  Ver Comanda
+                </button>
+                <button
+                  type="button"
+                  className={styles.pixBannerBtn}
+                  onClick={() => {
+                    setPixOrderId(mesa.activeOrder.id);
+                    setPixDialogOpen(true);
+                  }}
+                >
+                  Pagar via Pix (Mercado Pago)
+                </button>
+              </div>
             </div>
           )}
 
@@ -412,10 +578,22 @@ export default function MesaView() {
 
       <CheckoutDialog
         open={isCheckoutDialogOpen}
+        tableNumber={mesa?.tableNumber}
+        activeOrder={mesa?.activeOrder}
+        activeOrderItems={mesa?.activeOrder?.items || []}
         cartItems={cartItems}
         onClose={() => setCheckoutDialogOpen(false)}
+        onUpdateCartItemQty={handleUpdateCartItemQty}
+        onRemoveCartItem={handleRemoveCartItem}
+        onUpdateActiveItemQty={handleUpdateActiveItemQty}
+        onRemoveActiveItem={handleRemoveActiveItem}
+        onConfirmNewItems={cartItems.length > 0 ? handleConfirmNewItems : undefined}
         onFinish={handleFinishCheckout}
         onPayPix={handlePayWithPix}
+        isPixLoading={isPixLoading}
+        isManualLoading={isManualLoading}
+        isConfirmingNewItems={isConfirmingNewItems}
+        isUpdatingOrder={isUpdatingOrder}
       />
 
       <PixPaymentDialog
