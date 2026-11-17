@@ -11,6 +11,40 @@
 
 .titleRow {
   margin-bottom: 18px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.navShortcuts {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.navShortcutBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 0 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.navShortcutBtn:hover {
+  background: var(--surface-2);
+  color: var(--secondary);
+  border-color: rgba(242, 165, 65, 0.4);
 }
 
 .title {

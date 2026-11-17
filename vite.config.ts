@@ -14,8 +14,8 @@ export default defineConfig({
         name: 'Cardápio Churrascaria',
         short_name: 'Cardápio',
         description: 'Painel de controle do cardápio',
-        theme_color: '#1e1e2d',
-        background_color: '#f4f6f8',
+        theme_color: '#140d0b',
+        background_color: '#140d0b',
         display: 'standalone',
         orientation: 'portrait',
         icons: [

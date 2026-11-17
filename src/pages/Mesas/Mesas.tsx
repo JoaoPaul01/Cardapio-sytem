@@ -3,6 +3,8 @@ import { Dialog } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import TableBarIcon from '@mui/icons-material/TableBar';
 import DeleteIcon from '@mui/icons-material/Delete';
+import MenuBookIcon from '@mui/icons-material/MenuBook';
+import HistoryIcon from '@mui/icons-material/History';
 import { useNavigate } from 'react-router-dom';
 import { useAppContext } from '../../context/appContext';
 import { locations } from '../../services/locations';
@@ -110,10 +112,13 @@ export default function Mesas() {
           <h1 id="mesas-title" className={styles.title}>Mesas</h1>
           <p className={styles.subtitle}>Gerencie o salão e acompanhe as comandas ativas</p>
         </div>
-        <button type="button" className={styles.primaryBtn} onClick={() => setOpenDialog(true)}>
-          <AddIcon fontSize="small" aria-hidden="true" />
-          Criar mesa
-        </button>
+
+        <div className={styles.headerActions}>
+          <button type="button" className={styles.primaryBtn} onClick={() => setOpenDialog(true)}>
+            <AddIcon fontSize="small" aria-hidden="true" />
+            <span>Criar mesa</span>
+          </button>
+        </div>
       </header>
 
       {loadError && (

@@ -40,6 +40,7 @@ export function Login() {
     <main className={styles.page}>
       <section className={styles.card} aria-labelledby="login-title">
         <header className={styles.header}>
+          <img src="/logo.png" alt="Logo" style={{ width: '72px', height: '72px', borderRadius: '18px', margin: '0 auto 12px', display: 'block', boxShadow: '0 8px 24px rgba(228, 87, 46, 0.35)' }} />
           <span className={styles.badge}>
             <LocalFireDepartmentIcon fontSize="small" aria-hidden="true" />
             CHURRASCARIA &amp; COMANDA

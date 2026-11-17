@@ -36,11 +36,16 @@ export function Sidebar({ mobileOpen, handleDrawerToggle }: SidebarProps) {
   const drawerContent = (
     <>
       <div className={styles.brandHeader}>
-        <span className={styles.brandBadge}>
-          <LocalFireDepartmentIcon fontSize="inherit" aria-hidden="true" />
-          Churrascaria
-        </span>
-        <h2 className={styles.brandTitle}>Painel &amp; Comanda</h2>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <img src="/logo.png" alt="Logo" style={{ width: '44px', height: '44px', borderRadius: '12px', flexShrink: 0, boxShadow: '0 4px 12px rgba(228, 87, 46, 0.35)' }} />
+          <div>
+            <span className={styles.brandBadge}>
+              <LocalFireDepartmentIcon fontSize="inherit" aria-hidden="true" />
+              Churrascaria
+            </span>
+            <h2 className={styles.brandTitle} style={{ fontSize: '18px', margin: '2px 0 0' }}>Painel &amp; Comanda</h2>
+          </div>
+        </div>
       </div>
 
       <div className={styles.menuSection}>

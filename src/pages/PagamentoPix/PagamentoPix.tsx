@@ -1,6 +1,5 @@
-import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Box, Container, Typography, Button, Alert } from '@mui/material';
+import { Box, Container, Button, Alert } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { PixPaymentCard } from '../../components/PixPayment/PixPaymentCard';
 

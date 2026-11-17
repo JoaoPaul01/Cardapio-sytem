@@ -15,17 +15,23 @@
   right: 0;
   z-index: 1100;
   height: 60px;
-  padding: 0 16px;
+  padding: 0 12px;
   display: flex;
   align-items: center;
-  gap: 12px;
+  justify-content: space-between;
   background: var(--surface);
   border-bottom: 1px solid var(--border);
 }
 
+.mobileLeft {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .menuBtn {
-  width: 48px;
-  height: 48px;
+  width: 44px;
+  height: 44px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -36,19 +42,63 @@
   cursor: pointer;
 }
 
-.menuBtn:focus-visible {
+.menuBtn:focus-visible,
+.navQuickBtn:focus-visible {
   outline: 3px solid var(--secondary);
   outline-offset: 2px;
+}
+
+.brandLink {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  border: none;
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+  padding: 0;
 }
 
 .mobileTitle {
   margin: 0;
   font-family: var(--font-heading);
-  font-size: 20px;
+  font-size: 19px;
   font-weight: 600;
   letter-spacing: 0.5px;
   text-transform: uppercase;
   color: var(--text);
+}
+
+.mobileShortcuts {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.navQuickBtn {
+  width: 42px;
+  height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface-2);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.navQuickBtn:hover {
+  color: var(--text);
+  border-color: var(--secondary);
+}
+
+.navQuickBtnActive {
+  background: linear-gradient(135deg, rgba(228, 87, 46, 0.28), rgba(122, 30, 44, 0.35));
+  border-color: var(--secondary);
+  color: var(--secondary);
 }
 
 .main {
